@@ -2,7 +2,7 @@ backend:
   name: git-gateway
   branch: main
 
-media_folder: "media"
+media_folder: "site/media"
 public_folder: "/media"
 
 publish_mode: simple
@@ -15,7 +15,7 @@ collections:
     files:
       - name: "hero"
         label: "Hero (toppen)"
-        file: "content/site.json"
+        file: "site/content/site.json"
         fields:
           - { label: "Hero-video (mp4, maks ~15 MB)", name: "hero", widget: "object", fields: [
               { label: "Video", name: "video", widget: "file", required: false, hint: "Kort stum loop, 6–10 sek. Last opp her." },
