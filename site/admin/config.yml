@@ -1,0 +1,91 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "media"
+public_folder: "/media"
+
+publish_mode: simple
+site_url: /
+logo_url: /favicon.svg
+
+collections:
+  - name: "site"
+    label: "Nettsiden"
+    files:
+      - name: "hero"
+        label: "Hero (toppen)"
+        file: "content/site.json"
+        fields:
+          - { label: "Hero-video (mp4, maks ~15 MB)", name: "hero", widget: "object", fields: [
+              { label: "Video", name: "video", widget: "file", required: false, hint: "Kort stum loop, 6–10 sek. Last opp her." },
+              { label: "Stillbilde (brukes hvis ingen video)", name: "image", widget: "image", required: false },
+              { label: "Overtekst (norsk)", name: "kicker_no", widget: "string" },
+              { label: "Overtekst (engelsk)", name: "kicker_en", widget: "string" } ] }
+          - { label: "Åpningssetning (norsk)", name: "statement_no", widget: "text" }
+          - { label: "Åpningssetning (engelsk)", name: "statement_en", widget: "text" }
+          - { label: "Om meg 1 (norsk)", name: "about_no", widget: "text" }
+          - { label: "Om meg 1 (engelsk)", name: "about_en", widget: "text" }
+          - { label: "Om meg 2 (norsk)", name: "about2_no", widget: "text" }
+          - { label: "Om meg 2 (engelsk)", name: "about2_en", widget: "text" }
+          - { label: "Om meg 3 (norsk)", name: "about3_no", widget: "text" }
+          - { label: "Om meg 3 (engelsk)", name: "about3_en", widget: "text" }
+          - label: "Fakta-liste"
+            name: "facts"
+            widget: "list"
+            fields:
+              - { label: "Merkelapp (norsk)", name: "label_no", widget: "string" }
+              - { label: "Merkelapp (engelsk)", name: "label_en", widget: "string" }
+              - { label: "Verdi (norsk)", name: "value_no", widget: "string" }
+              - { label: "Verdi (engelsk)", name: "value_en", widget: "string" }
+          - label: "Utvalgt arbeid"
+            name: "work"
+            widget: "list"
+            summary: "{{fields.title_no}} — {{fields.meta}}"
+            fields:
+              - { label: "Bilde", name: "image", widget: "image", required: false }
+              - { label: "Tittel (norsk)", name: "title_no", widget: "string" }
+              - { label: "Tittel (engelsk)", name: "title_en", widget: "string" }
+              - { label: "Sted og år", name: "meta", widget: "string" }
+              - { label: "Undertekst (norsk)", name: "line_no", widget: "string" }
+              - { label: "Undertekst (engelsk)", name: "line_en", widget: "string" }
+              - { label: "Kategori", name: "cat", widget: "select", options: ["people", "commercial", "film", "landscape"] }
+              - { label: "Bredde (kolonner av 12)", name: "span", widget: "number", value_type: "int", min: 3, max: 12 }
+              - { label: "Bildeformat", name: "ratio", widget: "select", options: ["4 / 5", "1 / 1", "2 / 3", "3 / 2", "21 / 9", "16 / 9"] }
+              - { label: "Forskjøvet ned", name: "offset", widget: "boolean", default: false }
+          - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
+          - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
+          - label: "Flerkamera-krediteringer"
+            name: "credits"
+            widget: "list"
+            summary: "{{fields.production}} — {{fields.year}}"
+            fields:
+              - { label: "Produksjon", name: "production", widget: "string" }
+              - { label: "Rolle (norsk)", name: "role_no", widget: "string" }
+              - { label: "Rolle (engelsk)", name: "role_en", widget: "string" }
+              - { label: "År", name: "year", widget: "string" }
+          - label: "Tjenester"
+            name: "services"
+            widget: "list"
+            summary: "{{fields.name_no}}"
+            fields:
+              - { label: "Navn (norsk)", name: "name_no", widget: "string" }
+              - { label: "Navn (engelsk)", name: "name_en", widget: "string" }
+              - { label: "Beskrivelse (norsk)", name: "desc_no", widget: "text" }
+              - { label: "Beskrivelse (engelsk)", name: "desc_en", widget: "text" }
+          - { label: "Kundeliste", name: "clients", widget: "list", field: { label: "Kunde", name: "client", widget: "string" } }
+          - label: "Kundesitater"
+            name: "quotes"
+            widget: "list"
+            summary: "{{fields.by}}"
+            fields:
+              - { label: "Sitat (norsk)", name: "text_no", widget: "text" }
+              - { label: "Sitat (engelsk)", name: "text_en", widget: "text" }
+              - { label: "Signatur", name: "by", widget: "string" }
+          - label: "Kontakt"
+            name: "contact"
+            widget: "object"
+            fields:
+              - { label: "E-post", name: "email", widget: "string" }
+              - { label: "Telefon", name: "phone", widget: "string" }
+              - { label: "Instagram", name: "instagram", widget: "string" }

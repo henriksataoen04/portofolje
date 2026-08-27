@@ -1,0 +1,256 @@
+{
+  "hero": {
+    "video": "",
+    "image": "",
+    "kicker_no": "Foto & film",
+    "kicker_en": "Photography & film"
+  },
+  "statement_no": "Bilder og film som forteller en historie — og som får frem en følelse.",
+  "statement_en": "Stills and film that tell a story — and hold on to a feeling.",
+  "about_no": "Jeg har tatt bilder siden jeg var barn, og har bachelor i tv-produksjon fra TV-skolen.",
+  "about_en": "I've been taking pictures since I was a child, and hold a bachelor's in TV production from TV-skolen.",
+  "about2_no": "Jeg jobber rolig og nært. Bryllup, portrett, editorial, merkevare, eiendom, landskap — samme tilnærming hver gang: se etter det som faktisk skjer, og la det være. Base i Geilo, Lillehammer og Oslo, men jeg reiser gjerne.",
+  "about2_en": "I work quietly and close. Weddings, portraits, editorial, brand, property, landscape — same approach every time: look for what is actually happening, and let it be. Based in Geilo, Lillehammer and Oslo; happy to travel.",
+  "about3_no": "Jeg jobber også som flerkamerafotograf i tv-bransjen, blant annet på Birken, Junior-VM i langrenn og Landsskytterstevnet. Etter praksis i NRK Promo, som prosjektlederens høyre hånd, tar jeg gjerne oppgaver som prosjektkoordinator også.",
+  "about3_en": "I also work as a multicamera operator in broadcast — among others Birken, the Junior World Ski Championships and Landsskytterstevnet. After interning at NRK Promo as the project lead's right hand, I take on project coordination work as well.",
+  "facts": [
+    {
+      "label_no": "Utdanning",
+      "label_en": "Education",
+      "value_no": "Bachelor, tv-produksjon",
+      "value_en": "BA, TV production"
+    },
+    {
+      "label_no": "Erfaring",
+      "label_en": "Experience",
+      "value_no": "Foto siden barndommen",
+      "value_en": "Shooting since childhood"
+    },
+    {
+      "label_no": "Format",
+      "label_en": "Format",
+      "value_no": "Stillbilder, film og flerkamera",
+      "value_en": "Stills, film and multicam"
+    },
+    {
+      "label_no": "Base",
+      "label_en": "Based in",
+      "value_no": "Geilo · Lillehammer · Oslo",
+      "value_en": "Geilo · Lillehammer · Oslo"
+    },
+    {
+      "label_no": "Reiser",
+      "label_en": "Travel",
+      "value_no": "Verden over",
+      "value_en": "Worldwide"
+    }
+  ],
+  "work": [
+    {
+      "image": "",
+      "cat": "people",
+      "span": 7,
+      "ratio": "4 / 5",
+      "offset": false,
+      "title_no": "Vinterbryllup",
+      "title_en": "Winter wedding",
+      "meta": "Geilo, 2025",
+      "line_no": "Hel dag, dokumentarisk",
+      "line_en": "Full day, documentary"
+    },
+    {
+      "image": "",
+      "cat": "people",
+      "span": 5,
+      "ratio": "1 / 1",
+      "offset": true,
+      "title_no": "Portrettserie",
+      "title_en": "Portrait series",
+      "meta": "Oslo, 2025",
+      "line_no": "Naturlig lys, ute",
+      "line_en": "Natural light, outdoors"
+    },
+    {
+      "image": "",
+      "cat": "commercial",
+      "span": 12,
+      "ratio": "21 / 9",
+      "offset": false,
+      "title_no": "Kolleksjon",
+      "title_en": "Collection",
+      "meta": "Editorial, 2025",
+      "line_no": "Kolleksjon, 12 bilder",
+      "line_en": "Collection, 12 frames"
+    },
+    {
+      "image": "",
+      "cat": "film",
+      "span": 4,
+      "ratio": "2 / 3",
+      "offset": false,
+      "title_no": "Merkevarefilm",
+      "title_en": "Brand film",
+      "meta": "Oslo, 2024",
+      "line_no": "Merkevarefilm, 90 sek",
+      "line_en": "Brand film, 90 sec"
+    },
+    {
+      "image": "",
+      "cat": "commercial",
+      "span": 4,
+      "ratio": "2 / 3",
+      "offset": true,
+      "title_no": "Hytte ved fjellet",
+      "title_en": "Cabin in the mountains",
+      "meta": "Geilo, 2024",
+      "line_no": "Eiendom, foto og drone",
+      "line_en": "Property, stills and drone"
+    },
+    {
+      "image": "",
+      "cat": "landscape",
+      "span": 4,
+      "ratio": "2 / 3",
+      "offset": false,
+      "title_no": "Høyfjell",
+      "title_en": "High plateau",
+      "meta": "Jotunheimen, 2024",
+      "line_no": "Personlig serie",
+      "line_en": "Personal series"
+    },
+    {
+      "image": "",
+      "cat": "film",
+      "span": 6,
+      "ratio": "3 / 2",
+      "offset": false,
+      "title_no": "Festival",
+      "title_en": "Festival",
+      "meta": "Lillehammer, 2024",
+      "line_no": "Arrangement, flerkamera",
+      "line_en": "Event, multicam"
+    },
+    {
+      "image": "",
+      "cat": "people",
+      "span": 6,
+      "ratio": "3 / 2",
+      "offset": true,
+      "title_no": "Studioportrett",
+      "title_en": "Studio portrait",
+      "meta": "Oslo, 2023",
+      "line_no": "Studio, ett lys",
+      "line_en": "Studio, single light"
+    }
+  ],
+  "broadcast_intro_no": "Direktesendt sport og arrangement. Jeg kjenner kø, kommunikasjon og tempoet i en flerkameraproduksjon — og leverer like rolig når det er live.",
+  "broadcast_intro_en": "Live sport and events. I know the queue, the comms and the pace of a multicamera gallery — and I stay just as calm when it goes live.",
+  "credits": [
+    {
+      "production": "Birken",
+      "role_no": "Kameraoperatør",
+      "role_en": "Camera operator",
+      "year": "2024 — 2025"
+    },
+    {
+      "production": "Junior-VM i langrenn",
+      "role_no": "Kameraoperatør",
+      "role_en": "Camera operator",
+      "year": "2024"
+    },
+    {
+      "production": "Landsskytterstevnet, Lesja",
+      "role_no": "Kameraoperatør",
+      "role_en": "Camera operator",
+      "year": "2023"
+    },
+    {
+      "production": "NRK Promo",
+      "role_no": "Prosjektkoordinering, praksis",
+      "role_en": "Project coordination, internship",
+      "year": "2023"
+    }
+  ],
+  "services": [
+    {
+      "name_no": "Bryllup",
+      "name_en": "Weddings",
+      "desc_no": "Hel dag, foto og/eller film. Dokumentarisk, ikke oppstilt.",
+      "desc_en": "Full day, stills and/or film. Documentary, not posed."
+    },
+    {
+      "name_no": "Portrett",
+      "name_en": "Portraits",
+      "desc_no": "Personlig, redaksjonelt eller for bedrift. Studio eller ute.",
+      "desc_en": "Personal, editorial or corporate. Studio or outdoors."
+    },
+    {
+      "name_no": "Editorial & mote",
+      "name_en": "Editorial & fashion",
+      "desc_no": "Serier for magasin, kolleksjon og kampanje.",
+      "desc_en": "Series for magazines, collections and campaigns."
+    },
+    {
+      "name_no": "Merkevare & kommersielt",
+      "name_en": "Brand & commercial",
+      "desc_no": "Stillbilder og film til nett, sosiale medier og annonser.",
+      "desc_en": "Stills and film for web, social and advertising."
+    },
+    {
+      "name_no": "Eiendom",
+      "name_en": "Property",
+      "desc_no": "Bolig, hytte og næring. Foto, film og drone.",
+      "desc_en": "Homes, cabins and commercial. Photo, film and drone."
+    },
+    {
+      "name_no": "Arrangement",
+      "name_en": "Events",
+      "desc_no": "Konferanse, konsert, festival. Rask levering.",
+      "desc_en": "Conferences, concerts, festivals. Fast turnaround."
+    },
+    {
+      "name_no": "Flerkamera & tv",
+      "name_en": "Multicam & broadcast",
+      "desc_no": "Kameraoperatør på flerkameraproduksjon. Sport og direktesendte arrangementer.",
+      "desc_en": "Camera operator on multicamera productions. Sport and live events."
+    },
+    {
+      "name_no": "Prosjektkoordinering",
+      "name_en": "Project coordination",
+      "desc_no": "Koordinering og produksjonsledelse. Praksis i NRK Promo som prosjektlederens høyre hånd.",
+      "desc_en": "Coordination and production management. Interned at NRK Promo as the project lead's right hand."
+    }
+  ],
+  "clients": [
+    "NRK",
+    "Birken",
+    "Junior-VM i langrenn",
+    "Landsskytterstevnet",
+    "Visit Geilo",
+    "Hafjell",
+    "Olympiaparken",
+    "Norrøna"
+  ],
+  "quotes": [
+    {
+      "text_no": "Han er der uten at man merker det, og bildene ble akkurat slik dagen føltes.",
+      "text_en": "He was there without anyone noticing, and the images felt exactly like the day did.",
+      "by": "Bryllup, Geilo"
+    },
+    {
+      "text_no": "Leverte over det vi ba om, og gjorde det enkelt for oss.",
+      "text_en": "Delivered beyond the brief and made the whole thing easy for us.",
+      "by": "Merkevarekunde, Oslo"
+    },
+    {
+      "text_no": "Rolig, presis og lett å jobbe med. Vi bruker ham igjen.",
+      "text_en": "Calm, precise, easy to work with. We'll book him again.",
+      "by": "Byrå, Lillehammer"
+    }
+  ],
+  "contact": {
+    "email": "post@sataoenmedia.no",
+    "phone": "+47 000 00 000",
+    "instagram": "@sataoenmedia"
+  }
+}
