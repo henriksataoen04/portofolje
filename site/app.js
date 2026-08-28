@@ -375,6 +375,35 @@ function wire() {
   });
 }
 
+
+// Midlertidig diagnose: ?diag=1 viser tilstanden til stripene paa skjermen.
+// Fjernes naar mobilfeilen er funnet.
+if (/[?&]diag=1/.test(location.search)) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:0;top:0;z-index:9999;background:#000;color:#0f0;font:11px/1.35 ui-monospace,monospace;padding:8px;max-width:100%;white-space:pre;pointer-events:none";
+  document.addEventListener("DOMContentLoaded", () => document.body.appendChild(box));
+  let prev = [], moved = [], tick = 0;
+  setInterval(() => {
+    if (!box.isConnected && document.body) document.body.appendChild(box);
+    tick++;
+    const rows = (STRIPS || []).map((st, i) => {
+      const now = st.el.scrollLeft;
+      if (prev[i] === undefined) prev[i] = now;
+      if (Math.abs(now - prev[i]) > 0.4) moved[i] = tick;
+      prev[i] = now;
+      const r = st.el.getBoundingClientRect();
+      return i + " n" + st.n + " k" + (st.n ? Math.round(st.el.children.length / st.n) : 0)
+        + " s" + Math.round(st.shift) + (st.on ? " ON" : " off") + (st.go ? " GO" : " --")
+        + (r.bottom > 0 && r.top < innerHeight ? " syn" : " ute")
+        + " p" + Math.round(now) + " m" + (moved[i] ? tick - moved[i] : "-");
+    });
+    box.textContent = "raf:" + (RAF === null ? "STOPP" : "gaar")
+      + " hov:" + CAN_HOVER + " red:" + REDUCED
+      + "\n" + innerWidth + "x" + innerHeight + " t" + tick
+      + "\n" + rows.join("\n");
+  }, 250);
+}
+
 fetch("content/site.json?v=" + Date.now()).then((r) => r.json()).then((d) => { DATA = d; render(); }).catch((e) => {
   document.getElementById("app").innerHTML = '<p style="padding:60px 32px;font-family:' + SERIF + '">Kunne ikke laste innhold.</p>';
   console.error(e);
