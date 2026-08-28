@@ -170,6 +170,12 @@
       "desc_en": "Documentary coverage on assignment, editorial or for organisations."
     },
     {
+      "name_no": "Bedrift",
+      "name_en": "Business",
+      "desc_no": "Bilder og film en bedrift kan bruke i egne kanaler. Folk på jobb, produkt, stemning.",
+      "desc_en": "Images and film a company can use in its own channels. People at work, product, atmosphere."
+    },
+    {
       "name_no": "Eiendom",
       "name_en": "Property",
       "desc_no": "Bolig, hytte og næring. Foto, film og drone.",
