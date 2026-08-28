@@ -10,7 +10,15 @@ let DATA = null;
 let lang = (saved === "en" || saved === "no") ? saved : ((navigator.language || "").startsWith("en") ? "en" : "no");
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const L = (o, k) => o[k + "_" + lang] || o[k + "_no"] || o[k] || "";
-const media = (p) => !p ? "" : (/^https?:|^\//.test(p) ? p : "/" + p.replace(/^\.?\//, ""));
+const seg = (s) => { try { return encodeURIComponent(decodeURIComponent(s)); } catch (e) { return encodeURIComponent(s); } };
+// Filnavn fra kamera og Lightroom inneholder mellomrom og &. De maa
+// prosentkodes per segment, ellers blir src ugyldig. decodeURIComponent
+// foerst gjoer det trygt aa kjoere paa en sti som allerede er kodet.
+const media = (p) => {
+  if (!p) return "";
+  if (/^https?:/.test(p)) return p;
+  return (/^\//.test(p) ? p : "/" + p.replace(/^\.?\//, "")).split("/").map(seg).join("/");
+};
 
 function heroMedia() {
   const h = DATA.hero || {};
