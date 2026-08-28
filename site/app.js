@@ -58,7 +58,6 @@ function workStrips() {
     return '<section class="reveal" id="' + slug(c.name_no) + '" style="margin-bottom:clamp(44px,6vw,86px);scroll-margin-top:86px">'
       + '<h3 style="margin:0 0 15px;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
       + '<div class="strip" tabindex="0" style="display:flex;gap:10px;height:clamp(215px,30vh,370px);overflow-x:auto;margin-right:-32px;padding-right:32px">' + frames(ci) + '</div>'
-      + '<div class="bar" style="overflow:hidden;height:1px;margin-top:19px;background:rgba(22,19,15,0.13)"><i style="display:block;height:1px;width:0;background:' + ACCENT + '"></i></div>'
       + '</section>';
   }).join("");
 }
@@ -221,16 +220,17 @@ function render() {
 }
 
 const SPEED = 32;
+const TAU = 0.45;
+const MAXV = 3500;
 const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let STRIPS = [], RAF = null, LAST = 0;
 
 // Rammene ligger i to identiske kopier. Naar stripa har gaatt nøyaktig én
 // kopi videre, trekkes den tilbake dit den startet — og siden kopi to ser
-// ut som kopi én, er hoppet usynlig. shift er bredden paa én kopi pluss
-// mellomrommet som skiller de to.
+// ut som kopi én, er hoppet usynlig.
 const measure = (st) => {
   const n = st.dups.length;
-  if (!n) { st.shift = 0; st.on = false; st.frac = 1; return; }
+  if (!n) { st.shift = 0; st.on = false; return; }
   st.dups.forEach((d) => { d.style.display = ""; });
   const kids = st.el.children;
   // Mål avstanden fra kopi én til kopi to direkte. Å regne den ut fra
@@ -240,16 +240,12 @@ const measure = (st) => {
   if (fits) st.dups.forEach((d) => { d.style.display = "none"; });
   st.shift = fits ? 0 : shift;
   st.on = !REDUCED && !fits;
-  st.frac = fits ? 1 : Math.min(1, st.el.clientWidth / shift);
-};
-const paint = (st) => {
-  if (!st.shift || st.frac >= 1) { st.bar.style.opacity = 0; return; }
-  st.bar.style.opacity = 1;
-  const p = (st.el.scrollLeft % st.shift) / st.shift;
-  st.fill.style.width = (st.frac * 100) + "%";
-  st.fill.style.transform = "translateX(" + p * ((1 - st.frac) / st.frac) * 100 + "%)";
 };
 
+// Farten faller alltid eksponentielt mot grunnfarten. Slipper du stripa i
+// bevegelse, settes farten til kastet ditt og glir tilbake til 32 px/s av
+// seg selv. Den faller ogsaa mens stripa staar, saa et kast ikke ligger og
+// venter naar du flytter pekeren vekk igjen.
 function loop(t) {
   const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
   LAST = t;
@@ -257,9 +253,10 @@ function loop(t) {
   for (const st of STRIPS) {
     if (!st.on || !st.shift) continue;
     alive++;
+    st.vel = SPEED + (st.vel - SPEED) * Math.exp(-dt / TAU);
     if (!st.visible || st.hover || st.drag) continue;
-    let next = st.el.scrollLeft + SPEED * dt;
-    if (next >= st.shift) next %= st.shift;
+    let next = (st.el.scrollLeft + st.vel * dt) % st.shift;
+    if (next < 0) next += st.shift;
     st.el.scrollLeft = next;
   }
   if (alive) { RAF = requestAnimationFrame(loop); } else { RAF = null; LAST = 0; }
@@ -269,7 +266,7 @@ const startLoop = () => { if (RAF === null) { LAST = 0; RAF = requestAnimationFr
 if (!window.__smResize) {
   window.__smResize = 1;
   window.addEventListener("resize", () => {
-    for (const st of STRIPS) { measure(st); paint(st); }
+    for (const st of STRIPS) measure(st);
     startLoop();
   });
 }
@@ -287,14 +284,12 @@ function wire() {
     if (e.isIntersecting) startLoop();
   }), { rootMargin: "0px 0px -12% 0px" });
   document.querySelectorAll(".strip").forEach((s) => {
-    const bar = s.parentElement.querySelector(".bar");
-    const st = { el: s, bar: bar, fill: bar.querySelector("i"), dups: [].slice.call(s.querySelectorAll(".dup")),
-      on: false, visible: false, hover: false, drag: false, shift: 0, frac: 1 };
+    const st = { el: s, dups: [].slice.call(s.querySelectorAll(".dup")),
+      on: false, visible: false, hover: false, drag: false, shift: 0, vel: SPEED };
     STRIPS.push(st);
-    measure(st); paint(st);
-    s.addEventListener("scroll", () => { paint(st); startLoop(); }, { passive: true });
+    measure(st);
     s.querySelectorAll("img").forEach((im) => {
-      if (!im.complete) im.addEventListener("load", () => { measure(st); paint(st); startLoop(); }, { once: true });
+      if (!im.complete) im.addEventListener("load", () => { measure(st); startLoop(); }, { once: true });
     });
     s.addEventListener("dragstart", (e) => e.preventDefault());
     s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
@@ -302,21 +297,28 @@ function wire() {
     s.addEventListener("touchend", () => { st.drag = false; startLoop(); });
     s.addEventListener("touchcancel", () => { st.drag = false; startLoop(); });
     seen.observe(s);
-    let down = false, sx = 0, sl = 0, moved = false;
+    let down = false, sx = 0, sl = 0, moved = false, px = 0, pt = 0, flick = 0;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
       down = true; moved = false; st.drag = true;
       sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
+      px = e.clientX; pt = e.timeStamp || performance.now(); flick = 0;
     });
     s.addEventListener("pointermove", (e) => {
       if (!down) return;
       const dx = e.clientX - sx;
       if (Math.abs(dx) > 3) moved = true;
+      const now = e.timeStamp || performance.now();
+      if (now > pt) flick = -(e.clientX - px) / (now - pt) * 1000;
+      px = e.clientX; pt = now;
       let target = sl - dx;
-      if (st.shift) target = ((target % st.shift) + st.shift) % st.shift;
+      if (st.shift) { target %= st.shift; if (target < 0) target += st.shift; }
       s.scrollLeft = target;
     });
-    const end = () => { down = false; st.drag = false; s.style.cursor = ""; startLoop(); };
+    const end = () => {
+      if (down && moved) st.vel = Math.max(-MAXV, Math.min(MAXV, flick));
+      down = false; st.drag = false; s.style.cursor = ""; startLoop();
+    };
     s.addEventListener("pointerup", end);
     s.addEventListener("pointercancel", end);
     s.addEventListener("pointerleave", () => { end(); st.hover = false; });
