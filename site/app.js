@@ -11,27 +11,11 @@ let lang = (saved === "en" || saved === "no") ? saved : ((navigator.language || 
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const L = (o, k) => o[k + "_" + lang] || o[k + "_no"] || o[k] || "";
 const media = (p) => !p ? "" : (/^https?:|^\//.test(p) ? p : "/" + p.replace(/^\.?\//, ""));
-const CLD = /(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload)\//;
-const LOCALHOST = /^(localhost|127\.|\[?::1)/.test(location.hostname);
-const SIZES = {
-  strip: ["f_auto,q_auto,h_760,c_limit", "h=760"],
-  full: ["f_auto,q_auto,w_2200,c_limit", "w=2200"],
-  hero: ["f_auto,q_auto,w_2400,c_limit", "w=2400"]
-};
-// Cloudinary-bilder skaleres hos Cloudinary, bilder som ligger i repoet gaar
-// gjennom Netlify Image CDN. Begge forhandler format selv. Alt annet, og alt
-// lokalt under utvikling, slippes urort gjennom.
-const img = (u, size) => {
-  const s = media(u), z = SIZES[size] || SIZES.strip;
-  if (CLD.test(s)) return s.replace(CLD, "$1/" + z[0] + "/");
-  if (!LOCALHOST && /^\/media\/.+\.(jpe?g|png|webp|avif|gif)$/i.test(s)) return "/.netlify/images?url=" + encodeURIComponent(s) + "&" + z[1];
-  return s;
-};
 
 function heroMedia() {
   const h = DATA.hero || {};
   if (h.video) return '<video src="' + esc(media(h.video)) + '" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>';
-  if (h.image) return '<div style="position:absolute;inset:0;background-image:url(' + esc(img(h.image, "hero")) + ');background-size:cover;background-position:center"></div>';
+  if (h.image) return '<div style="position:absolute;inset:0;background-image:url(' + esc(media(h.image)) + ');background-size:cover;background-position:center"></div>';
   return '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1c1916 0 6px,#171412 6px 12px)"></div>';
 }
 
@@ -50,7 +34,7 @@ function frames(ci) {
   const nm = L(c, "name");
   return imgs.map((im, j) =>
     '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
-    + '<img src="' + esc(img(im.src, "strip")) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+    + '<img src="' + esc(media(im.src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
 }
@@ -81,7 +65,7 @@ function lbDraw() {
   const c = DATA.work[lbP], imgs = catImgs(c); if (!imgs.length) return;
   el.style.display = "flex";
   const cur = imgs[lbI], im = document.getElementById("lb-img");
-  im.src = img(cur.src, "full");
+  im.src = media(cur.src);
   im.alt = L(c, "name") + (cur.caption ? " — " + cur.caption : "");
   document.getElementById("lb-cap").innerHTML =
     '<span style="color:rgba(244,241,234,0.9)">' + esc(L(c, "name"))
@@ -90,7 +74,7 @@ function lbDraw() {
   const vis = imgs.length > 1 ? "block" : "none";
   document.getElementById("lb-prev").style.display = vis;
   document.getElementById("lb-next").style.display = vis;
-  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = img(s.src, "full"); });
+  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s.src); });
 }
 if (!window.__smKeys) {
   window.__smKeys = 1;

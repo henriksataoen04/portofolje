@@ -56,7 +56,7 @@ collections:
                 widget: "image"
                 multiple: true
                 required: false
-                hint: "Dra inn så mange bilder du vil på én gang. Rekkefølgen her blir rekkefølgen i filmstripa."
+                hint: "Dra inn så mange du vil på én gang. Eksporter i ca. 2400 px lang side fra Lightroom — da blir hvert bilde rundt 600 kB og ser skarpt ut overalt."
           - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
           - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
           - label: "Flerkamera-krediteringer"
