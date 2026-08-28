@@ -218,6 +218,9 @@ const TAU = 0.45;
 const MAXV = 3500;
 const EPS = 6;
 const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+// Bare enheter med ekte peker kan hovre. Paa telefon skal ingenting kunne
+// pause en stripe — hver pausemekanisme er en maate den kan sette seg fast.
+const CAN_HOVER = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
 let STRIPS = [], RAF = null, LAST = 0;
 
 // Rammene ligger i to identiske kopier. Naar stripa har gaatt nøyaktig én
@@ -255,7 +258,7 @@ const measure = (st) => {
 // akkurat satte i gang, bare fordi man er paa vei mot et bilde. Et trykk
 // stopper uansett, ogsaa midt i kastet.
 function loop(t) {
-  const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
+  const dt = LAST ? Math.min(Math.max((t - LAST) / 1000, 0), 0.1) : 0;
   LAST = t;
   const vh = window.innerHeight;
   let alive = 0;
@@ -315,10 +318,7 @@ function wire() {
       if (!im.complete) im.addEventListener("load", () => { measure(st); startLoop(); }, { once: true });
     });
     s.addEventListener("dragstart", (e) => e.preventDefault());
-    s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
-    s.addEventListener("touchstart", () => { st.drag = true; }, { passive: true });
-    s.addEventListener("touchend", () => { st.drag = false; startLoop(); });
-    s.addEventListener("touchcancel", () => { st.drag = false; startLoop(); });
+    if (CAN_HOVER) s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
     let down = false, sx = 0, sl = 0, moved = false, px = 0, pt = 0, flick = 0;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
