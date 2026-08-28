@@ -273,7 +273,11 @@ function loop(t) {
     alive++;
     st.vel = SPEED + (st.vel - SPEED) * Math.exp(-dt / TAU);
     const r = st.el.getBoundingClientRect();
-    st.go = r.bottom > 0 && r.top < vh && !st.hover && !st.drag;
+    // Pekeren over pauser bare naar stripa gaar i grunnfart. Glir et kast
+    // fortsatt ut, ignoreres den — ellers braastopper man noe man akkurat
+    // satte i gang, bare fordi man er paa vei mot et bilde.
+    st.go = r.bottom > 0 && r.top < vh && !st.drag
+      && !(st.hover && Math.abs(st.vel - SPEED) < EPS);
     st.cur = st.el.scrollLeft;
   }
   for (const st of STRIPS) {
@@ -285,7 +289,19 @@ function loop(t) {
     // desimaler, saa feilen fantes bare paa iPhone og iPad.
     // written er verdien nettleseren faktisk lagret sist. Avviker den fra
     // det vi leser naa, har brukeren flyttet stripa, og vi tar opp derfra.
-    if (Math.abs(st.cur - st.written) > 1.5) st.pos = st.cur;
+    if (Math.abs(st.cur - st.written) > 1.5) {
+      // Noen andre enn oss flyttet stripa: et drag, eller nettleserens egen
+      // treghet etter et sveip. Les av farten deres og la den bli vaar, saa
+      // bevegelsen glir ned mot grunnfarten i stedet for aa falle rett ned.
+      // Denne ramma legger vi ikke noe til — brukerens bevegelse faar staa.
+      if (dt > 0) {
+        const d = ((st.cur - st.pos) % st.shift + st.shift * 1.5) % st.shift - st.shift / 2;
+        st.vel = Math.max(-MAXV, Math.min(MAXV, d / dt));
+      }
+      st.pos = st.cur;
+      st.written = st.el.scrollLeft;
+      continue;
+    }
     st.pos = (st.pos + st.vel * dt) % st.shift;
     if (st.pos < 0) st.pos += st.shift;
     st.el.scrollLeft = st.pos;
@@ -350,6 +366,9 @@ function wire() {
     });
     const end = () => {
       if (down && moved) st.vel = Math.max(-MAXV, Math.min(MAXV, flick));
+      // Synk telleren til der brukeren slapp, saa avlesningen over ikke regner
+      // ut farten paa nytt og overskriver kastet vi nettopp maalte.
+      if (down) { st.pos = s.scrollLeft; st.written = s.scrollLeft; }
       down = false; st.drag = false; s.style.cursor = ""; startLoop();
     };
     s.addEventListener("pointerup", end);
