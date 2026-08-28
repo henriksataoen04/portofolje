@@ -40,17 +40,11 @@ function frames(ci) {
   const c = DATA.work[ci], imgs = catImgs(c);
   if (!imgs.length) return '<div style="flex:none;height:100%;aspect-ratio:3 / 2;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
   const nm = L(c, "name");
-  // To identiske kopier, slik at sløyfen blir usynlig. Kopi to er skjult for
-  // skjermlesere og tastatur, men kan klikkes som originalen.
-  const copy = (dup) => imgs.map((im, j) =>
-    '<button class="fr' + (dup ? ' dup' : '') + '" data-p="' + ci + '" data-i="' + j + '"'
-    + (dup ? ' aria-hidden="true" tabindex="-1"'
-           : ' aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '"')
-    + ' style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
+  return imgs.map((im, j) =>
+    '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
     + '<img src="' + esc(media(im.src)) + '" alt="" draggable="false" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
-  return copy(false) + copy(true);
 }
 
 function workStrips() {
@@ -230,17 +224,25 @@ let STRIPS = [], RAF = null, LAST = 0;
 // kopi videre, trekkes den tilbake dit den startet — og siden kopi to ser
 // ut som kopi én, er hoppet usynlig.
 const measure = (st) => {
-  const n = st.dups.length;
-  if (!n) { st.shift = 0; st.on = false; return; }
-  st.dups.forEach((d) => { d.style.display = ""; });
-  const kids = st.el.children;
-  // Mål avstanden fra kopi én til kopi to direkte. Å regne den ut fra
-  // bredder, mellomrom og padding bommet med en brøkdel av en piksel.
-  const shift = kids[kids.length - n].offsetLeft - kids[0].offsetLeft;
-  const fits = shift <= st.el.clientWidth + 8;
-  if (fits) st.dups.forEach((d) => { d.style.display = "none"; });
-  st.shift = fits ? 0 : shift;
-  st.on = !REDUCED && !fits;
+  const s = st.el, kids = s.children;
+  if (st.n < 2 || !kids.length) { st.shift = 0; st.on = false; return; }
+  const gap = parseFloat(getComputedStyle(s).columnGap) || 0;
+  const last = kids[st.n - 1];
+  // Bredden paa én kopi, inkludert mellomrommet som skiller den fra neste.
+  // Grovt anslag, bare for aa bestemme hvor mange kopier som trengs.
+  const one = last.offsetLeft + last.offsetWidth - kids[0].offsetLeft + gap;
+  if (one <= 0) { st.shift = 0; st.on = false; return; }
+  // Nok kopier til at det alltid finnes innhold aa vise til hoeyre for
+  // skjermkanten. Korte kategorier gjentas oftere, ikke sjeldnere.
+  const want = Math.min(8, Math.max(2, Math.ceil(s.clientWidth / one) + 1));
+  let have = Math.round(kids.length / st.n);
+  while (have < want) { st.tpl.forEach((k) => s.appendChild(k.cloneNode(true))); have++; }
+  while (have > want) { for (let k = 0; k < st.n; k++) s.removeChild(s.lastElementChild); have--; }
+  // Naar kopiene er paa plass, maal avstanden eksakt i stedet for aa stole
+  // paa utregningen: offsetWidth avrundes til heltall, og ett bomma piksel
+  // gir et synlig rykk hver runde.
+  st.shift = kids[st.n].getBoundingClientRect().left - kids[0].getBoundingClientRect().left;
+  st.on = !REDUCED;
 };
 
 // Farten faller alltid eksponentielt mot grunnfarten. Slipper du stripa i
@@ -290,8 +292,15 @@ function wire() {
     if (e.isIntersecting) startLoop();
   }), { rootMargin: "0px 0px -12% 0px" });
   document.querySelectorAll(".strip").forEach((s) => {
-    const st = { el: s, dups: [].slice.call(s.querySelectorAll(".dup")),
-      on: false, visible: false, hover: false, drag: false, shift: 0, vel: SPEED };
+    const orig = [].slice.call(s.children);
+    const st = { el: s, n: s.querySelectorAll(".fr").length, on: false, visible: false,
+      hover: false, drag: false, shift: 0, vel: SPEED,
+      // Kopiene er usynlige for skjermlesere og tastatur, men klikkbare.
+      tpl: orig.map((k) => {
+        const c = k.cloneNode(true);
+        if (c.classList) { c.classList.add("dup"); c.setAttribute("aria-hidden", "true"); c.setAttribute("tabindex", "-1"); c.removeAttribute("aria-label"); }
+        return c;
+      }) };
     STRIPS.push(st);
     measure(st);
     s.querySelectorAll("img").forEach((im) => {
@@ -328,9 +337,13 @@ function wire() {
     s.addEventListener("pointerup", end);
     s.addEventListener("pointercancel", end);
     s.addEventListener("pointerleave", () => { end(); st.hover = false; });
-    s.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    // Delegert klikk: kopiene finnes ikke naar denne koden kjoerer.
+    s.addEventListener("click", (e) => {
+      if (moved) { moved = false; e.preventDefault(); e.stopPropagation(); return; }
+      const f = e.target.closest ? e.target.closest(".fr") : null;
+      if (f) lbOpen(+f.dataset.p, +f.dataset.i);
+    });
   });
-  document.querySelectorAll(".fr").forEach((f) => f.addEventListener("click", () => lbOpen(+f.dataset.p, +f.dataset.i)));
   const lb = document.getElementById("lb");
   if (lb) {
     lb.addEventListener("click", (e) => { if (e.target === lb) lbClose(); });
