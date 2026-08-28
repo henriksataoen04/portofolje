@@ -41,20 +41,22 @@ collections:
           - label: "Utvalgt arbeid"
             name: "work"
             widget: "list"
-            summary: "{{fields.title_no}} — {{fields.meta}}"
+            label_singular: "Kategori"
+            summary: "{{fields.name_no}}"
+            hint: "Hver kategori blir én filmstripe på siden, i den rekkefølgen de står her. Dra for å flytte."
             fields:
-              - { label: "Tittel (norsk)", name: "title_no", widget: "string" }
-              - { label: "Tittel (engelsk)", name: "title_en", widget: "string" }
-              - { label: "Sted og år", name: "meta", widget: "string" }
-              - { label: "Undertekst (norsk)", name: "line_no", widget: "string" }
-              - { label: "Undertekst (engelsk)", name: "line_en", widget: "string" }
-              - { label: "Kategori", name: "cat", widget: "select", options: ["people", "commercial", "film", "landscape"] }
+              - { label: "Navn (norsk)", name: "name_no", widget: "string" }
+              - { label: "Navn (engelsk)", name: "name_en", widget: "string" }
               - label: "Bilder"
                 name: "images"
                 widget: "list"
                 required: false
-                hint: "Legg til så mange bilder du vil — de vises som en filmstripe. Dra for å endre rekkefølge."
-                field: { label: "Bilde", name: "src", widget: "image" }
+                label_singular: "Bilde"
+                summary: "{{fields.caption}}"
+                hint: "Legg inn så mange du vil, fra ulike jobber. Dra for å endre rekkefølge."
+                fields:
+                  - { label: "Bilde", name: "src", widget: "image" }
+                  - { label: "Bildetekst (valgfri)", name: "caption", widget: "string", required: false, hint: "F.eks. «Geilo, 2025». Vises når bildet åpnes stort." }
           - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
           - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
           - label: "Flerkamera-krediteringer"

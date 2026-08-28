@@ -51,77 +51,43 @@
   "statement_no": "Bilder og film som forteller en historie — og som får frem en følelse.",
   "work": [
     {
-      "meta": "Geilo, 2025",
-      "title_no": "Bryllup",
-      "line_no": "Hel dag, dokumentarisk",
-      "title_en": "Wedding",
-      "line_en": "Full day, documentary",
-      "cat": "people",
+      "name_no": "Bryllup",
+      "name_en": "Weddings",
       "images": [
-        "/media/25-08-mamma-bernt-raw-export-229.jpg"
+        {
+          "src": "/media/25-08-mamma-bernt-raw-export-229.jpg",
+          "caption": "Geilo, 2025"
+        }
       ]
     },
     {
-      "meta": "Oslo, 2025",
-      "title_no": "Portrettserie",
-      "line_no": "Naturlig lys, ute",
-      "title_en": "Portrait series",
-      "line_en": "Natural light, outdoors",
-      "cat": "people",
+      "name_no": "Portrett",
+      "name_en": "Portraits",
       "images": []
     },
     {
-      "meta": "Editorial, 2025",
-      "title_no": "Kolleksjon",
-      "line_no": "Kolleksjon, 12 bilder",
-      "title_en": "Collection",
-      "line_en": "Collection, 12 frames",
-      "cat": "commercial",
+      "name_no": "Editorial & mote",
+      "name_en": "Editorial & fashion",
       "images": []
     },
     {
-      "meta": "Oslo, 2024",
-      "title_no": "Merkevarefilm",
-      "line_no": "Merkevarefilm, 90 sek",
-      "title_en": "Brand film",
-      "line_en": "Brand film, 90 sec",
-      "cat": "film",
+      "name_no": "Merkevare",
+      "name_en": "Brand",
       "images": []
     },
     {
-      "meta": "Geilo, 2024",
-      "title_no": "Hytte ved fjellet",
-      "line_no": "Eiendom, foto og drone",
-      "title_en": "Cabin in the mountains",
-      "line_en": "Property, stills and drone",
-      "cat": "commercial",
+      "name_no": "Eiendom",
+      "name_en": "Property",
       "images": []
     },
     {
-      "meta": "Jotunheimen, 2024",
-      "title_no": "Høyfjell",
-      "line_no": "Personlig serie",
-      "title_en": "High plateau",
-      "line_en": "Personal series",
-      "cat": "landscape",
+      "name_no": "Arrangement",
+      "name_en": "Events",
       "images": []
     },
     {
-      "meta": "Lillehammer, 2024",
-      "title_no": "Festival",
-      "line_no": "Arrangement, flerkamera",
-      "title_en": "Festival",
-      "line_en": "Event, multicam",
-      "cat": "film",
-      "images": []
-    },
-    {
-      "meta": "Oslo, 2023",
-      "title_no": "Studioportrett",
-      "line_no": "Studio, ett lys",
-      "title_en": "Studio portrait",
-      "line_en": "Studio, single light",
-      "cat": "people",
+      "name_no": "Landskap",
+      "name_en": "Landscape",
       "images": []
     }
   ],

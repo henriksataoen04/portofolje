@@ -1,7 +1,3 @@
-const CATS = {
-  no: { all: "Alt", people: "Mennesker", commercial: "Kommersielt", film: "Film", landscape: "Landskap" },
-  en: { all: "All", people: "People", commercial: "Commercial", film: "Film", landscape: "Landscape" }
-};
 const UI = {
   no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", frames: "bilder", soon: "Bilder kommer", drag: "Dra eller sveip for å bla", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
   en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", frames: "frames", soon: "Images coming", drag: "Drag or swipe to browse", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
@@ -10,7 +6,7 @@ const ACCENT = "oklch(0.55 0.095 45)";
 const ACCENT_LIGHT = "oklch(0.72 0.095 45)";
 const SERIF = "Newsreader, Georgia, serif";
 const saved = localStorage.getItem("sm-lang");
-let DATA = null, cat = "all";
+let DATA = null;
 let lang = (saved === "en" || saved === "no") ? saved : ((navigator.language || "").startsWith("en") ? "en" : "no");
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const L = (o, k) => o[k + "_" + lang] || o[k + "_no"] || o[k] || "";
@@ -23,81 +19,66 @@ function heroMedia() {
   return '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1c1916 0 6px,#171412 6px 12px)"></div>';
 }
 
-const CATORDER = ["people", "commercial", "film", "landscape"];
-
-const projImgs = (w) => {
-  const l = (Array.isArray(w.images) ? w.images : []).filter(Boolean);
-  return l.length ? l : (w.image ? [w.image] : []);
+const slug = (s) => {
+  const b = String(s || "").toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "o").replace(/å/g, "a")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return "cat-" + (b || "x");
 };
-const byCat = () => {
-  const m = {};
-  (DATA.work || []).forEach((w, i) => { if (w.cat) (m[w.cat] = m[w.cat] || []).push(i); });
-  return m;
-};
-const catCount = (idx) => idx.reduce((a, i) => a + projImgs(DATA.work[i]).length, 0);
+const catImgs = (c) => (Array.isArray(c && c.images) ? c.images : [])
+  .map((x) => (typeof x === "string" ? { src: x } : x))
+  .filter((x) => x && x.src);
 
-function frames(i) {
-  const w = DATA.work[i], imgs = projImgs(w);
+function frames(ci) {
+  const c = DATA.work[ci], imgs = catImgs(c);
   if (!imgs.length) return '<div style="flex:none;height:100%;aspect-ratio:3 / 2;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
-  const alt = esc(L(w, "title") + " — " + (w.meta || ""));
-  return imgs.map((src, j) =>
-    '<button class="fr" data-p="' + i + '" data-i="' + j + '" aria-label="' + alt + ' (' + (j + 1) + '/' + imgs.length + ')" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
-    + '<img src="' + esc(media(src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+  const nm = L(c, "name");
+  return imgs.map((im, j) =>
+    '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
+    + '<img src="' + esc(media(im.src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
 }
 
 function workStrips() {
-  const m = byCat();
-  return CATORDER.filter((c) => m[c] && m[c].length).map((c) => {
-    const n = catCount(m[c]);
-    return '<section class="reveal" id="cat-' + c + '" style="margin-bottom:clamp(48px,6.5vw,92px);scroll-margin-top:86px">'
+  return (DATA.work || []).map((c, ci) => {
+    const n = catImgs(c).length;
+    return '<section class="reveal" id="' + slug(c.name_no) + '" style="margin-bottom:clamp(44px,6vw,86px);scroll-margin-top:86px">'
       + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:15px">'
-      + '<h3 style="margin:0;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(CATS[lang][c]) + '</h3>'
+      + '<h3 style="margin:0;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
       + '<span style="font-family:' + SERIF + ';font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.4);white-space:nowrap">' + (n ? n + " " + UI[lang].frames : UI[lang].soon) + '</span>'
       + '</div>'
-      + '<div class="strip" tabindex="0" style="display:flex;gap:clamp(28px,3.6vw,56px);overflow-x:auto;margin-right:-32px;padding-right:32px">'
-      + m[c].map((i) => {
-        const w = DATA.work[i];
-        return '<div style="flex:none;display:flex;flex-direction:column;gap:11px">'
-          + '<div style="display:flex;gap:8px;height:clamp(215px,30vh,370px)">' + frames(i) + '</div>'
-          + '<div style="position:sticky;left:0;align-self:flex-start;display:flex;flex-wrap:wrap;gap:2px 11px;font-family:' + SERIF + ';font-size:14.5px">'
-          + '<span>' + esc(L(w, "title")) + '</span>'
-          + '<span style="font-style:italic;color:rgba(22,19,15,0.45)">' + esc(w.meta || "") + '</span>'
-          + '</div></div>';
-      }).join("")
-      + '</div>'
-      + '<div class="bar" style="overflow:hidden;height:1px;margin-top:21px;background:rgba(22,19,15,0.13)"><i style="display:block;height:1px;width:0;background:' + ACCENT + '"></i></div>'
+      + '<div class="strip" tabindex="0" style="display:flex;gap:10px;height:clamp(215px,30vh,370px);overflow-x:auto;margin-right:-32px;padding-right:32px">' + frames(ci) + '</div>'
+      + '<div class="bar" style="overflow:hidden;height:1px;margin-top:19px;background:rgba(22,19,15,0.13)"><i style="display:block;height:1px;width:0;background:' + ACCENT + '"></i></div>'
       + '</section>';
   }).join("");
 }
 
 function catNav() {
-  const m = byCat();
-  return CATORDER.filter((c) => m[c] && m[c].length).map((c) =>
-    '<a href="#cat-' + c + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(CATS[lang][c])
-    + '<span style="font-size:0.62em;vertical-align:super;margin-left:5px;opacity:0.55">' + catCount(m[c]) + '</span></a>'
+  return (DATA.work || []).map((c) =>
+    '<a href="#' + slug(c.name_no) + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(L(c, "name"))
+    + '<span style="font-size:0.62em;vertical-align:super;margin-left:5px;opacity:0.55">' + catImgs(c).length + '</span></a>'
   ).join("");
 }
 
 let lbP = -1, lbI = 0;
 function lbOpen(p, i) { lbP = p; lbI = i; document.body.style.overflow = "hidden"; lbDraw(); }
 function lbClose() { lbP = -1; document.body.style.overflow = ""; const e = document.getElementById("lb"); if (e) e.style.display = "none"; }
-function lbGo(d) { if (lbP < 0) return; const n = projImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw(); }
+function lbGo(d) { if (lbP < 0) return; const n = catImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw(); }
 function lbDraw() {
   const el = document.getElementById("lb"); if (!el || lbP < 0) return;
-  const w = DATA.work[lbP], imgs = projImgs(w); if (!imgs.length) return;
+  const c = DATA.work[lbP], imgs = catImgs(c); if (!imgs.length) return;
   el.style.display = "flex";
-  const im = document.getElementById("lb-img");
-  im.src = media(imgs[lbI]);
-  im.alt = L(w, "title") + " — " + (w.meta || "");
+  const cur = imgs[lbI], im = document.getElementById("lb-img");
+  im.src = media(cur.src);
+  im.alt = L(c, "name") + (cur.caption ? " — " + cur.caption : "");
   document.getElementById("lb-cap").innerHTML =
-    '<span style="color:rgba(244,241,234,0.9)">' + esc(L(w, "title")) + '<span style="font-style:italic;color:rgba(244,241,234,0.5)"> — ' + esc(L(w, "line")) + '</span></span>'
-    + '<span style="font-style:italic">' + esc(w.meta || "") + ' · ' + (lbI + 1) + " / " + imgs.length + '</span>';
+    '<span style="color:rgba(244,241,234,0.9)">' + esc(L(c, "name"))
+    + (cur.caption ? '<span style="font-style:italic;color:rgba(244,241,234,0.5)"> — ' + esc(cur.caption) + '</span>' : '')
+    + '</span><span style="font-style:italic">' + (lbI + 1) + " / " + imgs.length + '</span>';
   const vis = imgs.length > 1 ? "block" : "none";
   document.getElementById("lb-prev").style.display = vis;
   document.getElementById("lb-next").style.display = vis;
-  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s); });
+  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s.src); });
 }
 if (!window.__smKeys) {
   window.__smKeys = 1;
