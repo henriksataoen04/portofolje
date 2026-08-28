@@ -11,11 +11,16 @@ let lang = (saved === "en" || saved === "no") ? saved : ((navigator.language || 
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const L = (o, k) => o[k + "_" + lang] || o[k + "_no"] || o[k] || "";
 const media = (p) => !p ? "" : (/^https?:|^\//.test(p) ? p : "/" + p.replace(/^\.?\//, ""));
+const CLD = /(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload)\//;
+const CLD_STRIP = "f_auto,q_auto,h_760,c_limit";
+const CLD_FULL = "f_auto,q_auto,w_2200,c_limit";
+const CLD_HERO = "f_auto,q_auto,w_2400,c_limit";
+const cld = (u, t) => { const s = media(u); return CLD.test(s) ? s.replace(CLD, "$1/" + t + "/") : s; };
 
 function heroMedia() {
   const h = DATA.hero || {};
   if (h.video) return '<video src="' + esc(media(h.video)) + '" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>';
-  if (h.image) return '<div style="position:absolute;inset:0;background-image:url(' + esc(media(h.image)) + ');background-size:cover;background-position:center"></div>';
+  if (h.image) return '<div style="position:absolute;inset:0;background-image:url(' + esc(cld(h.image, CLD_HERO)) + ');background-size:cover;background-position:center"></div>';
   return '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1c1916 0 6px,#171412 6px 12px)"></div>';
 }
 
@@ -34,7 +39,7 @@ function frames(ci) {
   const nm = L(c, "name");
   return imgs.map((im, j) =>
     '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
-    + '<img src="' + esc(media(im.src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+    + '<img src="' + esc(cld(im.src, CLD_STRIP)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
 }
@@ -65,7 +70,7 @@ function lbDraw() {
   const c = DATA.work[lbP], imgs = catImgs(c); if (!imgs.length) return;
   el.style.display = "flex";
   const cur = imgs[lbI], im = document.getElementById("lb-img");
-  im.src = media(cur.src);
+  im.src = cld(cur.src, CLD_FULL);
   im.alt = L(c, "name") + (cur.caption ? " — " + cur.caption : "");
   document.getElementById("lb-cap").innerHTML =
     '<span style="color:rgba(244,241,234,0.9)">' + esc(L(c, "name"))
@@ -74,7 +79,7 @@ function lbDraw() {
   const vis = imgs.length > 1 ? "block" : "none";
   document.getElementById("lb-prev").style.display = vis;
   document.getElementById("lb-next").style.display = vis;
-  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s.src); });
+  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = cld(s.src, CLD_FULL); });
 }
 if (!window.__smKeys) {
   window.__smKeys = 1;
