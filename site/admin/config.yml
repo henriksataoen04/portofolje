@@ -17,11 +17,23 @@ collections:
         label: "Hero (toppen)"
         file: "site/content/site.json"
         fields:
-          - { label: "Hero-video (mp4, maks ~15 MB)", name: "hero", widget: "object", fields: [
-              { label: "Video", name: "video", widget: "file", required: false, hint: "Kort stum loop, 6–10 sek. Last opp her." },
-              { label: "Stillbilde (brukes hvis ingen video)", name: "image", widget: "image", required: false },
-              { label: "Overtekst (norsk)", name: "kicker_no", widget: "string" },
-              { label: "Overtekst (engelsk)", name: "kicker_en", widget: "string" } ] }
+          - label: "Hero (toppen)"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Video", name: "video", widget: "file", required: false, hint: "Kort stum loop. Komprimer før opplasting — over ~1 MB blir opplastingen ustabil." }
+              - label: "Stillbilde (brukes hvis ingen video)"
+                name: "image"
+                widget: "image"
+                required: false
+                media_library:
+                  name: cloudinary
+                  use_transformations: false
+                  config:
+                    cloud_name: "xog7smuj"
+                    api_key: "736561418353629"
+              - { label: "Overtekst (norsk)", name: "kicker_no", widget: "string" }
+              - { label: "Overtekst (engelsk)", name: "kicker_en", widget: "string" }
           - { label: "Åpningssetning (norsk)", name: "statement_no", widget: "text" }
           - { label: "Åpningssetning (engelsk)", name: "statement_en", widget: "text" }
           - { label: "Om meg 1 (norsk)", name: "about_no", widget: "text" }
@@ -52,8 +64,18 @@ collections:
                 widget: "list"
                 required: false
                 label_singular: "Bilde"
-                hint: "Ingen grense — legg inn så mange du vil, fra ulike jobber. Dra for å endre rekkefølge."
-                field: { label: "Bilde", name: "src", widget: "image" }
+                hint: "Legg inn så mange du vil, fra ulike jobber. Dra for å endre rekkefølge."
+                field:
+                  label: "Bilde"
+                  name: "src"
+                  widget: "image"
+                  media_library:
+                    name: cloudinary
+                    use_transformations: false
+                    config:
+                      cloud_name: "xog7smuj"
+                      api_key: "736561418353629"
+                      multiple: true
           - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
           - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
           - label: "Flerkamera-krediteringer"
