@@ -9,8 +9,16 @@ public_folder: "/media"
 # Sveltia optimaliserer bildene i nettleseren FØR de committes:
 # skalerer ned til maks 2400 px og konverterer til WebP. Du kan derfor
 # laste opp rått fra Lightroom uten å tenke på filstørrelse.
+# Gjør filnavn URL-vennlige ved opplasting. Løser & som brakk opplastingen,
+# og samtidig mellomrom, æøå og aksenter. Gjelder bare nye filer.
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
+
 media_libraries:
   all:
+    slugify_filename: true
     transformations:
       raster_image:
         format: webp
