@@ -158,28 +158,22 @@
       "desc_en": "Personal, editorial or corporate. Studio or outdoors."
     },
     {
-      "name_no": "Editorial & mote",
-      "name_en": "Editorial & fashion",
-      "desc_no": "Serier for magasin, kolleksjon og kampanje.",
-      "desc_en": "Series for magazines, collections and campaigns."
+      "name_no": "Arrangement & sport",
+      "name_en": "Events & sport",
+      "desc_no": "Konsert, festival, konferanse og idrett. Rask levering.",
+      "desc_en": "Concerts, festivals, conferences and sport. Fast turnaround."
     },
     {
-      "name_no": "Merkevare & kommersielt",
-      "name_en": "Brand & commercial",
-      "desc_no": "Stillbilder og film til nett, sosiale medier og annonser.",
-      "desc_en": "Stills and film for web, social and advertising."
+      "name_no": "Reportasje",
+      "name_en": "Reportage",
+      "desc_no": "Dokumentarisk dekning på oppdrag, redaksjonelt eller for organisasjoner.",
+      "desc_en": "Documentary coverage on assignment, editorial or for organisations."
     },
     {
       "name_no": "Eiendom",
       "name_en": "Property",
       "desc_no": "Bolig, hytte og næring. Foto, film og drone.",
       "desc_en": "Homes, cabins and commercial. Photo, film and drone."
-    },
-    {
-      "name_no": "Arrangement",
-      "name_en": "Events",
-      "desc_no": "Konferanse, konsert, festival. Rask levering.",
-      "desc_en": "Conferences, concerts, festivals. Fast turnaround."
     },
     {
       "name_no": "Flerkamera & TV",
@@ -190,7 +184,7 @@
     {
       "name_no": "Prosjektkoordinering",
       "name_en": "Project coordination",
-      "desc_no": "Koordinering og produksjonsledelse. Praksis i NRK Promoavdeling",
+      "desc_no": "Koordinering og produksjonsledelse. Praksis fra NRK Promo.",
       "desc_en": "Coordination and production management. Interned at NRK Promo."
     }
   ],
