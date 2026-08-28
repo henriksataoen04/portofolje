@@ -134,39 +134,39 @@
       "production": "Birken",
       "role_no": "Kameraoperatør",
       "role_en": "Camera operator",
-      "year": "2024 — 2025"
+      "year": "2026"
     },
     {
-      "production": "Junior-VM i langrenn",
+      "production": "Junior-VM i langrenn, Birkebeineren stadion",
       "role_no": "Kameraoperatør",
       "role_en": "Camera operator",
-      "year": "2024"
+      "year": "2026"
     },
     {
       "production": "Landsskytterstevnet, Lesja",
       "role_no": "Kameraoperatør",
       "role_en": "Camera operator",
-      "year": "2023"
+      "year": "2026"
     },
     {
       "production": "NRK Promo",
       "role_no": "Prosjektkoordinering, praksis",
       "role_en": "Project coordination, internship",
-      "year": "2023"
+      "year": "2026"
     }
   ],
   "services": [
     {
       "name_no": "Bryllup",
       "name_en": "Weddings",
-      "desc_no": "Hel dag, foto og/eller film. Dokumentarisk, ikke oppstilt.",
-      "desc_en": "Full day, stills and/or film. Documentary, not posed."
+      "desc_no": "Hel dag, foto eller film.",
+      "desc_en": "Full day, stills or film."
     },
     {
       "name_no": "Portrett",
       "name_en": "Portraits",
-      "desc_no": "Personlig, redaksjonelt eller for bedrift. Studio eller ute.",
-      "desc_en": "Personal, editorial or corporate. Studio or outdoors."
+      "desc_no": "Personlig, redaksjonelt eller for bedrift. Både innendørs eller ute.",
+      "desc_en": "Personal, editorial or corporate. Indoors or outdoors."
     },
     {
       "name_no": "Arrangement & sport",
@@ -195,8 +195,8 @@
     {
       "name_no": "Flerkamera & TV",
       "name_en": "Multicam & broadcast",
-      "desc_no": "Kameraoperatør på flerkameraproduksjon. Sport og direktesendte arrangementer.",
-      "desc_en": "Camera operator on multicamera productions. Sport and live events."
+      "desc_no": "Fotograf/kameraoperatør på flerkameraproduksjon. Sport, studio og direktesendte arrangementer.",
+      "desc_en": "Photographer/camera operator on multicamera productions. Sports, studio and live events."
     },
     {
       "name_no": "Prosjektkoordinering",
@@ -206,30 +206,19 @@
     }
   ],
   "clients": [
-    "NRK",
     "Birken",
     "Junior-VM i langrenn",
     "Landsskytterstevnet",
-    "Visit Geilo",
-    "Stisema",
-    "Olympiaparken",
-    "Norrøna"
+    "Hol kommune",
+    "Stisema DJ/Pers Hotell",
+    "Høgskolen i Innlandet",
+    "VS Media"
   ],
   "quotes": [
     {
-      "text_no": "Han er der uten at man merker det, og bildene ble akkurat slik dagen føltes.",
-      "text_en": "He was there without anyone noticing, and the images felt exactly like the day did.",
-      "by": "Bryllup, Geilo"
-    },
-    {
-      "text_no": "Leverte over det vi ba om, og gjorde det enkelt for oss.",
-      "text_en": "Delivered beyond the brief and made the whole thing easy for us.",
-      "by": "Merkevarekunde, Oslo"
-    },
-    {
-      "text_no": "Rolig, presis og lett å jobbe med. Vi bruker ham igjen.",
-      "text_en": "Calm, precise, easy to work with. We'll book him again.",
-      "by": "Byrå, Lillehammer"
+      "text_no": "– Tusen takk for alle magiske øyeblikk du har foreviget for oss.",
+      "text_en": "– Thank you for all the magical moments you have captured for us.",
+      "by": "Bryllup"
     }
   ],
   "contact": {
