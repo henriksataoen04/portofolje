@@ -40,11 +40,17 @@ function frames(ci) {
   const c = DATA.work[ci], imgs = catImgs(c);
   if (!imgs.length) return '<div style="flex:none;height:100%;aspect-ratio:3 / 2;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
   const nm = L(c, "name");
-  return imgs.map((im, j) =>
-    '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
+  // To identiske kopier, slik at sløyfen blir usynlig. Kopi to er skjult for
+  // skjermlesere og tastatur, men kan klikkes som originalen.
+  const copy = (dup) => imgs.map((im, j) =>
+    '<button class="fr' + (dup ? ' dup' : '') + '" data-p="' + ci + '" data-i="' + j + '"'
+    + (dup ? ' aria-hidden="true" tabindex="-1"'
+           : ' aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '"')
+    + ' style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
     + '<img src="' + esc(media(im.src)) + '" alt="" draggable="false" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
+  return copy(false) + copy(true);
 }
 
 function workStrips() {
@@ -218,31 +224,43 @@ const SPEED = 32;
 const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let STRIPS = [], RAF = null, LAST = 0;
 
+// Rammene ligger i to identiske kopier. Naar stripa har gaatt nøyaktig én
+// kopi videre, trekkes den tilbake dit den startet — og siden kopi to ser
+// ut som kopi én, er hoppet usynlig. shift er bredden paa én kopi pluss
+// mellomrommet som skiller de to.
 const measure = (st) => {
-  st.max = st.el.scrollWidth - st.el.clientWidth;
-  st.frac = st.el.clientWidth / st.el.scrollWidth;
+  const n = st.dups.length;
+  if (!n) { st.shift = 0; st.on = false; st.frac = 1; return; }
+  st.dups.forEach((d) => { d.style.display = ""; });
+  const kids = st.el.children;
+  // Mål avstanden fra kopi én til kopi to direkte. Å regne den ut fra
+  // bredder, mellomrom og padding bommet med en brøkdel av en piksel.
+  const shift = kids[kids.length - n].offsetLeft - kids[0].offsetLeft;
+  const fits = shift <= st.el.clientWidth + 8;
+  if (fits) st.dups.forEach((d) => { d.style.display = "none"; });
+  st.shift = fits ? 0 : shift;
+  st.on = !REDUCED && !fits;
+  st.frac = fits ? 1 : Math.min(1, st.el.clientWidth / shift);
 };
 const paint = (st) => {
-  if (st.max < 4) { st.bar.style.opacity = 0; return; }
+  if (!st.shift || st.frac >= 1) { st.bar.style.opacity = 0; return; }
   st.bar.style.opacity = 1;
+  const p = (st.el.scrollLeft % st.shift) / st.shift;
   st.fill.style.width = (st.frac * 100) + "%";
-  st.fill.style.transform = "translateX(" + ((1 - st.frac) / st.frac) * (st.el.scrollLeft / st.max) * 100 + "%)";
+  st.fill.style.transform = "translateX(" + p * ((1 - st.frac) / st.frac) * 100 + "%)";
 };
 
-// Stripa glir naar den er synlig, og staar bare mens pekeren er over den
-// eller du drar i den. Posisjonen leses fra elementet hver ramme, saa den
-// fortsetter derfra du slapp i stedet for aa hoppe tilbake.
 function loop(t) {
   const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
   LAST = t;
   let alive = 0;
   for (const st of STRIPS) {
-    if (!st.on || st.max < 4) continue;
-    const cur = st.el.scrollLeft;
-    if (cur >= st.max - 0.5) continue;
+    if (!st.on || !st.shift) continue;
     alive++;
     if (!st.visible || st.hover || st.drag) continue;
-    st.el.scrollLeft = Math.min(st.max, cur + SPEED * dt);
+    let next = st.el.scrollLeft + SPEED * dt;
+    if (next >= st.shift) next %= st.shift;
+    st.el.scrollLeft = next;
   }
   if (alive) { RAF = requestAnimationFrame(loop); } else { RAF = null; LAST = 0; }
 }
@@ -270,8 +288,8 @@ function wire() {
   }), { rootMargin: "0px 0px -12% 0px" });
   document.querySelectorAll(".strip").forEach((s) => {
     const bar = s.parentElement.querySelector(".bar");
-    const st = { el: s, bar: bar, fill: bar.querySelector("i"), on: !REDUCED,
-      visible: false, hover: false, drag: false, max: 0, frac: 1 };
+    const st = { el: s, bar: bar, fill: bar.querySelector("i"), dups: [].slice.call(s.querySelectorAll(".dup")),
+      on: false, visible: false, hover: false, drag: false, shift: 0, frac: 1 };
     STRIPS.push(st);
     measure(st); paint(st);
     s.addEventListener("scroll", () => { paint(st); startLoop(); }, { passive: true });
@@ -294,7 +312,9 @@ function wire() {
       if (!down) return;
       const dx = e.clientX - sx;
       if (Math.abs(dx) > 3) moved = true;
-      s.scrollLeft = sl - dx;
+      let target = sl - dx;
+      if (st.shift) target = ((target % st.shift) + st.shift) % st.shift;
+      s.scrollLeft = target;
     });
     const end = () => { down = false; st.drag = false; s.style.cursor = ""; startLoop(); };
     s.addEventListener("pointerup", end);
