@@ -1,6 +1,6 @@
 const UI = {
-  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", frames: "bilder", soon: "Bilder kommer", drag: "Dra eller sveip for å bla", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
-  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", frames: "frames", soon: "Images coming", drag: "Drag or swipe to browse", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
+  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", drag: "Dra eller sveip for å bla", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
+  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", drag: "Drag or swipe to browse", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
 };
 const ACCENT = "oklch(0.55 0.095 45)";
 const ACCENT_LIGHT = "oklch(0.72 0.095 45)";
@@ -41,12 +41,8 @@ function frames(ci) {
 
 function workStrips() {
   return (DATA.work || []).map((c, ci) => {
-    const n = catImgs(c).length;
     return '<section class="reveal" id="' + slug(c.name_no) + '" style="margin-bottom:clamp(44px,6vw,86px);scroll-margin-top:86px">'
-      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:15px">'
-      + '<h3 style="margin:0;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
-      + '<span style="font-family:' + SERIF + ';font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.4);white-space:nowrap">' + (n ? n + " " + UI[lang].frames : UI[lang].soon) + '</span>'
-      + '</div>'
+      + '<h3 style="margin:0 0 15px;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
       + '<div class="strip" tabindex="0" style="display:flex;gap:10px;height:clamp(215px,30vh,370px);overflow-x:auto;margin-right:-32px;padding-right:32px">' + frames(ci) + '</div>'
       + '<div class="bar" style="overflow:hidden;height:1px;margin-top:19px;background:rgba(22,19,15,0.13)"><i style="display:block;height:1px;width:0;background:' + ACCENT + '"></i></div>'
       + '</section>';

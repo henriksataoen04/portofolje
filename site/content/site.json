@@ -54,10 +54,7 @@
       "name_no": "Bryllup",
       "name_en": "Weddings",
       "images": [
-        {
-          "src": "/media/25-08-mamma-bernt-raw-export-229.jpg",
-          "caption": "Geilo, 2025"
-        }
+        "/media/25-08-mamma-bernt-raw-export-229.jpg"
       ]
     },
     {

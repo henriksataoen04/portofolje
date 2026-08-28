@@ -52,11 +52,8 @@ collections:
                 widget: "list"
                 required: false
                 label_singular: "Bilde"
-                summary: "{{fields.caption}}"
-                hint: "Legg inn så mange du vil, fra ulike jobber. Dra for å endre rekkefølge."
-                fields:
-                  - { label: "Bilde", name: "src", widget: "image" }
-                  - { label: "Bildetekst (valgfri)", name: "caption", widget: "string", required: false, hint: "F.eks. «Geilo, 2025». Vises når bildet åpnes stort." }
+                hint: "Ingen grense — legg inn så mange du vil, fra ulike jobber. Dra for å endre rekkefølge."
+                field: { label: "Bilde", name: "src", widget: "image" }
           - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
           - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
           - label: "Flerkamera-krediteringer"
