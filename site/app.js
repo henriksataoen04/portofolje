@@ -222,6 +222,7 @@ function render() {
 const SPEED = 32;
 const TAU = 0.45;
 const MAXV = 3500;
+const EPS = 6;
 const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 let STRIPS = [], RAF = null, LAST = 0;
 
@@ -246,6 +247,11 @@ const measure = (st) => {
 // bevegelse, settes farten til kastet ditt og glir tilbake til 32 px/s av
 // seg selv. Den faller ogsaa mens stripa staar, saa et kast ikke ligger og
 // venter naar du flytter pekeren vekk igjen.
+//
+// Pekeren over stripa pauser den bare naar den gaar i grunnfart. Er et kast
+// fortsatt paa vei ut, ignoreres den — ellers bråstopper man noe man
+// akkurat satte i gang, bare fordi man er paa vei mot et bilde. Et trykk
+// stopper uansett, ogsaa midt i kastet.
 function loop(t) {
   const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
   LAST = t;
@@ -254,7 +260,7 @@ function loop(t) {
     if (!st.on || !st.shift) continue;
     alive++;
     st.vel = SPEED + (st.vel - SPEED) * Math.exp(-dt / TAU);
-    if (!st.visible || st.hover || st.drag) continue;
+    if (!st.visible || st.drag || (st.hover && Math.abs(st.vel - SPEED) < EPS)) continue;
     let next = (st.el.scrollLeft + st.vel * dt) % st.shift;
     if (next < 0) next += st.shift;
     st.el.scrollLeft = next;
@@ -300,7 +306,7 @@ function wire() {
     let down = false, sx = 0, sl = 0, moved = false, px = 0, pt = 0, flick = 0;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
-      down = true; moved = false; st.drag = true;
+      down = true; moved = false; st.drag = true; st.vel = SPEED;
       sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
       px = e.clientX; pt = e.timeStamp || performance.now(); flick = 0;
     });
