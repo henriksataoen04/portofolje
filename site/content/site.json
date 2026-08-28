@@ -49,7 +49,12 @@
     {
       "name_no": "Bryllup",
       "name_en": "Weddings",
-      "images": []
+      "images": [
+        "/media/eivind-jannicke-bryllup-08-08-2026-44.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-96.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-112.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-118.webp"
+      ]
     },
     {
       "name_no": "Portrett",
