@@ -6,6 +6,20 @@ backend:
 media_folder: "site/media"
 public_folder: "/media"
 
+# Sveltia optimaliserer bildene i nettleseren FØR de committes:
+# skalerer ned til maks 2400 px og konverterer til WebP. Du kan derfor
+# laste opp rått fra Lightroom uten å tenke på filstørrelse.
+media_libraries:
+  all:
+    transformations:
+      raster_image:
+        format: webp
+        quality: 85
+        width: 2400
+        height: 2400
+      svg:
+        optimize: true
+
 publish_mode: simple
 site_url: /
 logo_url: /favicon.svg
