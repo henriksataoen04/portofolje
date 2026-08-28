@@ -206,23 +206,59 @@ function render() {
   wire();
 }
 
+const DRIFT = 0.62;
+const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+let STRIPS = [];
+
+function driftTick() {
+  const vh = window.innerHeight;
+  for (const st of STRIPS) {
+    if (!st.auto) continue;
+    const max = st.el.scrollWidth - st.el.clientWidth;
+    if (max < 4) continue;
+    const r = st.el.getBoundingClientRect();
+    let p = (vh - r.top) / (vh + r.height);
+    p = (p - st.delay) / (1 - st.delay);
+    p = p < 0 ? 0 : p > 1 ? 1 : p;
+    const v = p * max * DRIFT;
+    st.set = v;
+    st.el.scrollLeft = v;
+  }
+}
+
+if (!window.__smDrift) {
+  window.__smDrift = 1;
+  let queued = false;
+  const tick = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; driftTick(); });
+  };
+  window.addEventListener("scroll", tick, { passive: true });
+  window.addEventListener("resize", () => { for (const st of STRIPS) if (st.upd) st.upd(); tick(); });
+}
+
 function wire() {
   document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", () => {
     lang = el.dataset.lang; localStorage.setItem("sm-lang", lang); render();
   }));
   lbClose();
-  document.querySelectorAll(".strip").forEach((s) => {
+  STRIPS = [];
+  document.querySelectorAll(".strip").forEach((s, i) => {
     const bar = s.parentElement.querySelector(".bar"), fill = bar.querySelector("i");
+    const st = { el: s, auto: !REDUCED, delay: (i % 3) * 0.09, set: 0, upd: null };
     const upd = () => {
       const max = s.scrollWidth - s.clientWidth;
       if (max < 4) { bar.style.opacity = 0; return; }
+      if (st.auto && Math.abs(s.scrollLeft - st.set) > 2) st.auto = false;
       const frac = s.clientWidth / s.scrollWidth;
       bar.style.opacity = 1;
       fill.style.width = (frac * 100) + "%";
       fill.style.transform = "translateX(" + ((1 - frac) / frac) * (s.scrollLeft / max) * 100 + "%)";
     };
+    st.upd = upd;
+    STRIPS.push(st);
     s.addEventListener("scroll", upd, { passive: true });
-    window.addEventListener("resize", upd);
     s.querySelectorAll("img").forEach((im) => { if (!im.complete) im.addEventListener("load", upd, { once: true }); });
     upd();
     let down = false, sx = 0, sl = 0, moved = false;
@@ -233,7 +269,7 @@ function wire() {
     s.addEventListener("pointermove", (e) => {
       if (!down) return;
       const dx = e.clientX - sx;
-      if (Math.abs(dx) > 4) moved = true;
+      if (Math.abs(dx) > 4) { moved = true; st.auto = false; }
       s.scrollLeft = sl - dx;
     });
     const end = () => { down = false; s.style.cursor = ""; };
@@ -242,6 +278,7 @@ function wire() {
     s.addEventListener("pointerleave", end);
     s.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   });
+  driftTick();
   document.querySelectorAll(".fr").forEach((f) => f.addEventListener("click", () => lbOpen(+f.dataset.p, +f.dataset.i)));
   const lb = document.getElementById("lb");
   if (lb) {
