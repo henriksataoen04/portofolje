@@ -1,0 +1,6 @@
+{
+  "name": "sataoen-prerender",
+  "private": true,
+  "type": "module",
+  "dependencies": { "linkedom": "^0.18.0" }
+}

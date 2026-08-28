@@ -42,7 +42,7 @@ function frames(ci) {
   const nm = L(c, "name");
   return imgs.map((im, j) =>
     '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
-    + '<img src="' + esc(media(im.src)) + '" alt="" draggable="false" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+    + '<img src="' + esc(media(im.src)) + '" alt="' + esc(nm + (im.caption ? " — " + im.caption : "")) + '" draggable="false" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
 }
@@ -210,7 +210,9 @@ function render() {
     <div id="lb-cap" style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 24px;padding:18px clamp(20px,4vw,34px);font-family:${SERIF};font-size:14.5px;color:rgba(244,241,234,0.6);pointer-events:none"></div>
   </div>`;
 
-  wire();
+  // Under prerendering finnes ingen layout aa maale, og ingenting aa
+  // klikke paa. Bare markupen skal ut.
+  if (!window.__PRERENDER) wire();
 }
 
 const SPEED = 32;

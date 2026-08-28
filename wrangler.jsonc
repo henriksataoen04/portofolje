@@ -3,9 +3,13 @@
   // Da er alle forespørsler statiske assets, som er gratis og umålt.
   "name": "portofolje",
   "compatibility_date": "2026-08-28",
+  // Byggesteget prerendrer innholdet fra site/ inn i dist/, slik at
+  // søkemotorer får ferdig HTML i stedet for en tom div.
+  "build": {
+    "command": "npm --prefix build ci && node build/prerender.mjs"
+  },
   "assets": {
-    // Innholdet ligger i site/, ikke i repo-roten.
-    // Dette erstatter "Build output directory" fra Pages-dashbordet.
-    "directory": "./site"
+    // dist/ lages av bygget. site/ er kilden og røres ikke.
+    "directory": "./dist"
   }
 }
