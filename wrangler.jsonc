@@ -1,0 +1,11 @@
+{
+  // Ren statisk side — ingen Worker-kode, så "main" er bevisst utelatt.
+  // Da er alle forespørsler statiske assets, som er gratis og umålt.
+  "name": "portofolje",
+  "compatibility_date": "2026-08-28",
+  "assets": {
+    // Innholdet ligger i site/, ikke i repo-roten.
+    // Dette erstatter "Build output directory" fra Pages-dashbordet.
+    "directory": "./site"
+  }
+}
