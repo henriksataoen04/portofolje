@@ -24,7 +24,8 @@
   input:focus, textarea:focus { border-bottom-color: oklch(0.72 0.095 45); }
   button[type=submit] { justify-self: start; margin-top: 6px; background: #f4f1ea; color: #12100e; border: 0; padding: 16px 30px; font-family: Newsreader, Georgia, serif; font-size: 15px; cursor: pointer; transition: background 300ms ease; }
   button[type=submit]:hover { background: oklch(0.72 0.095 45); }
-  .strip { cursor: grab; scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior-x: contain; }
+  .strip { cursor: grab; scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior-x: contain; user-select: none; -webkit-user-select: none; }
+  .fr img { -webkit-user-drag: none; user-drag: none; }
   .strip::-webkit-scrollbar { display: none; }
   .strip:focus-visible { outline: 1px solid oklch(0.55 0.095 45); outline-offset: 8px; }
   .fr:focus-visible { outline: 1px solid oklch(0.55 0.095 45); outline-offset: 3px; }

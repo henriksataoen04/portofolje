@@ -42,7 +42,7 @@ function frames(ci) {
   const nm = L(c, "name");
   return imgs.map((im, j) =>
     '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
-    + '<img src="' + esc(media(im.src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+    + '<img src="' + esc(media(im.src)) + '" alt="" draggable="false" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
     + '</button>'
   ).join("");
 }
@@ -229,20 +229,20 @@ const paint = (st) => {
   st.fill.style.transform = "translateX(" + ((1 - st.frac) / st.frac) * (st.el.scrollLeft / st.max) * 100 + "%)";
 };
 
-// Hver stripe glir av seg selv naar den kommer til syne, ikke i takt med
-// skrollen. Musepekeren over setter den paa pause, saa bildet ikke sklir
-// unna mens du sikter. Tar du tak i den, stopper den for godt.
+// Stripa glir naar den er synlig, og staar bare mens pekeren er over den
+// eller du drar i den. Posisjonen leses fra elementet hver ramme, saa den
+// fortsetter derfra du slapp i stedet for aa hoppe tilbake.
 function loop(t) {
   const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
   LAST = t;
   let alive = 0;
   for (const st of STRIPS) {
-    if (!st.auto || st.max < 4 || st.pos >= st.max) continue;
+    if (!st.on || st.max < 4) continue;
+    const cur = st.el.scrollLeft;
+    if (cur >= st.max - 0.5) continue;
     alive++;
-    if (!st.visible || st.hover) continue;
-    st.pos = Math.min(st.max, st.pos + SPEED * dt);
-    st.set = st.pos;
-    st.el.scrollLeft = st.pos;
+    if (!st.visible || st.hover || st.drag) continue;
+    st.el.scrollLeft = Math.min(st.max, cur + SPEED * dt);
   }
   if (alive) { RAF = requestAnimationFrame(loop); } else { RAF = null; LAST = 0; }
 }
@@ -270,34 +270,36 @@ function wire() {
   }), { rootMargin: "0px 0px -12% 0px" });
   document.querySelectorAll(".strip").forEach((s) => {
     const bar = s.parentElement.querySelector(".bar");
-    const st = { el: s, bar: bar, fill: bar.querySelector("i"), auto: !REDUCED,
-      visible: false, hover: false, pos: s.scrollLeft || 0, set: s.scrollLeft || 0, max: 0, frac: 1 };
+    const st = { el: s, bar: bar, fill: bar.querySelector("i"), on: !REDUCED,
+      visible: false, hover: false, drag: false, max: 0, frac: 1 };
     STRIPS.push(st);
     measure(st); paint(st);
-    s.addEventListener("scroll", () => {
-      if (st.auto && Math.abs(s.scrollLeft - st.set) > 2) st.auto = false;
-      paint(st);
-    }, { passive: true });
+    s.addEventListener("scroll", () => { paint(st); startLoop(); }, { passive: true });
     s.querySelectorAll("img").forEach((im) => {
       if (!im.complete) im.addEventListener("load", () => { measure(st); paint(st); startLoop(); }, { once: true });
     });
+    s.addEventListener("dragstart", (e) => e.preventDefault());
     s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
+    s.addEventListener("touchstart", () => { st.drag = true; }, { passive: true });
+    s.addEventListener("touchend", () => { st.drag = false; startLoop(); });
+    s.addEventListener("touchcancel", () => { st.drag = false; startLoop(); });
     seen.observe(s);
     let down = false, sx = 0, sl = 0, moved = false;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
-      down = true; moved = false; sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
+      down = true; moved = false; st.drag = true;
+      sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
     });
     s.addEventListener("pointermove", (e) => {
       if (!down) return;
       const dx = e.clientX - sx;
-      if (Math.abs(dx) > 4) { moved = true; st.auto = false; }
+      if (Math.abs(dx) > 3) moved = true;
       s.scrollLeft = sl - dx;
     });
-    const end = () => { down = false; s.style.cursor = ""; };
+    const end = () => { down = false; st.drag = false; s.style.cursor = ""; startLoop(); };
     s.addEventListener("pointerup", end);
     s.addEventListener("pointercancel", end);
-    s.addEventListener("pointerleave", () => { end(); st.hover = false; startLoop(); });
+    s.addEventListener("pointerleave", () => { end(); st.hover = false; });
     s.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   });
   document.querySelectorAll(".fr").forEach((f) => f.addEventListener("click", () => lbOpen(+f.dataset.p, +f.dataset.i)));
