@@ -257,13 +257,23 @@ const measure = (st) => {
 function loop(t) {
   const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
   LAST = t;
+  const vh = window.innerHeight;
   let alive = 0;
+  // Les foerst, skriv etterpaa. Aa veksle mellom aa lese geometri og sette
+  // scrollLeft i samme sloeyfe tvinger nettleseren til aa regne om layout
+  // for hver stripe.
   for (const st of STRIPS) {
+    st.go = false;
     if (!st.on || !st.shift) continue;
     alive++;
     st.vel = SPEED + (st.vel - SPEED) * Math.exp(-dt / TAU);
-    if (!st.visible || st.drag || (st.hover && Math.abs(st.vel - SPEED) < EPS)) continue;
-    let next = (st.el.scrollLeft + st.vel * dt) % st.shift;
+    const r = st.el.getBoundingClientRect();
+    st.go = r.bottom > 0 && r.top < vh && !st.hover && !st.drag;
+    st.cur = st.el.scrollLeft;
+  }
+  for (const st of STRIPS) {
+    if (!st.go) continue;
+    let next = (st.cur + st.vel * dt) % st.shift;
     if (next < 0) next += st.shift;
     st.el.scrollLeft = next;
   }
@@ -273,9 +283,13 @@ const startLoop = () => { if (RAF === null) { LAST = 0; RAF = requestAnimationFr
 
 if (!window.__smResize) {
   window.__smResize = 1;
+  let rt = null;
   window.addEventListener("resize", () => {
-    for (const st of STRIPS) measure(st);
-    startLoop();
+    clearTimeout(rt);
+    // Paa mobil fyrer resize hver gang adressefeltet skjuler seg under
+    // scrolling. Uten pause ville measure() lagt til og fjernet kopier
+    // kontinuerlig mens man blar.
+    rt = setTimeout(() => { for (const st of STRIPS) measure(st); startLoop(); }, 150);
   });
 }
 
@@ -285,12 +299,6 @@ function wire() {
   }));
   lbClose();
   STRIPS = [];
-  const seen = new IntersectionObserver((es) => es.forEach((e) => {
-    const st = STRIPS.find((x) => x.el === e.target);
-    if (!st) return;
-    st.visible = e.isIntersecting;
-    if (e.isIntersecting) startLoop();
-  }), { rootMargin: "0px 0px -12% 0px" });
   document.querySelectorAll(".strip").forEach((s) => {
     const orig = [].slice.call(s.children);
     const st = { el: s, n: s.querySelectorAll(".fr").length, on: false, visible: false,
@@ -311,7 +319,6 @@ function wire() {
     s.addEventListener("touchstart", () => { st.drag = true; }, { passive: true });
     s.addEventListener("touchend", () => { st.drag = false; startLoop(); });
     s.addEventListener("touchcancel", () => { st.drag = false; startLoop(); });
-    seen.observe(s);
     let down = false, sx = 0, sl = 0, moved = false, px = 0, pt = 0, flick = 0;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
