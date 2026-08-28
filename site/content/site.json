@@ -53,98 +53,76 @@
     {
       "meta": "Geilo, 2025",
       "title_no": "Bryllup",
-      "span": 7,
-      "ratio": "4 / 5",
       "line_no": "Hel dag, dokumentarisk",
       "title_en": "Wedding",
-      "offset": false,
       "line_en": "Full day, documentary",
       "cat": "people",
-      "image": "/media/25-08-mamma-bernt-raw-export-229.jpg"
+      "images": [
+        "/media/25-08-mamma-bernt-raw-export-229.jpg"
+      ]
     },
     {
       "meta": "Oslo, 2025",
       "title_no": "Portrettserie",
-      "span": 5,
-      "ratio": "1 / 1",
       "line_no": "Naturlig lys, ute",
       "title_en": "Portrait series",
-      "offset": true,
       "line_en": "Natural light, outdoors",
       "cat": "people",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Editorial, 2025",
       "title_no": "Kolleksjon",
-      "span": 12,
-      "ratio": "21 / 9",
       "line_no": "Kolleksjon, 12 bilder",
       "title_en": "Collection",
-      "offset": false,
       "line_en": "Collection, 12 frames",
       "cat": "commercial",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Oslo, 2024",
       "title_no": "Merkevarefilm",
-      "span": 4,
-      "ratio": "2 / 3",
       "line_no": "Merkevarefilm, 90 sek",
       "title_en": "Brand film",
-      "offset": false,
       "line_en": "Brand film, 90 sec",
       "cat": "film",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Geilo, 2024",
       "title_no": "Hytte ved fjellet",
-      "span": 4,
-      "ratio": "2 / 3",
       "line_no": "Eiendom, foto og drone",
       "title_en": "Cabin in the mountains",
-      "offset": true,
       "line_en": "Property, stills and drone",
       "cat": "commercial",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Jotunheimen, 2024",
       "title_no": "Høyfjell",
-      "span": 4,
-      "ratio": "2 / 3",
       "line_no": "Personlig serie",
       "title_en": "High plateau",
-      "offset": false,
       "line_en": "Personal series",
       "cat": "landscape",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Lillehammer, 2024",
       "title_no": "Festival",
-      "span": 6,
-      "ratio": "3 / 2",
       "line_no": "Arrangement, flerkamera",
       "title_en": "Festival",
-      "offset": false,
       "line_en": "Event, multicam",
       "cat": "film",
-      "image": ""
+      "images": []
     },
     {
       "meta": "Oslo, 2023",
       "title_no": "Studioportrett",
-      "span": 6,
-      "ratio": "3 / 2",
       "line_no": "Studio, ett lys",
       "title_en": "Studio portrait",
-      "offset": true,
       "line_en": "Studio, single light",
       "cat": "people",
-      "image": ""
+      "images": []
     }
   ],
   "broadcast_intro_no": "Direktesendt sport og arrangement. Jeg kjenner kø, kommunikasjon og tempoet i en flerkameraproduksjon — og leverer like rolig når det er live.",

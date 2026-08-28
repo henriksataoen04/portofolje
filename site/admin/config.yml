@@ -43,16 +43,18 @@ collections:
             widget: "list"
             summary: "{{fields.title_no}} — {{fields.meta}}"
             fields:
-              - { label: "Bilde", name: "image", widget: "image", required: false }
               - { label: "Tittel (norsk)", name: "title_no", widget: "string" }
               - { label: "Tittel (engelsk)", name: "title_en", widget: "string" }
               - { label: "Sted og år", name: "meta", widget: "string" }
               - { label: "Undertekst (norsk)", name: "line_no", widget: "string" }
               - { label: "Undertekst (engelsk)", name: "line_en", widget: "string" }
               - { label: "Kategori", name: "cat", widget: "select", options: ["people", "commercial", "film", "landscape"] }
-              - { label: "Bredde (kolonner av 12)", name: "span", widget: "number", value_type: "int", min: 3, max: 12 }
-              - { label: "Bildeformat", name: "ratio", widget: "select", options: ["4 / 5", "1 / 1", "2 / 3", "3 / 2", "21 / 9", "16 / 9"] }
-              - { label: "Forskjøvet ned", name: "offset", widget: "boolean", default: false }
+              - label: "Bilder"
+                name: "images"
+                widget: "list"
+                required: false
+                hint: "Legg til så mange bilder du vil — de vises som en filmstripe. Dra for å endre rekkefølge."
+                field: { label: "Bilde", name: "src", widget: "image" }
           - { label: "Flerkamera-intro (norsk)", name: "broadcast_intro_no", widget: "text" }
           - { label: "Flerkamera-intro (engelsk)", name: "broadcast_intro_en", widget: "text" }
           - label: "Flerkamera-krediteringer"

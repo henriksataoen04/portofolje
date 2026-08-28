@@ -3,8 +3,8 @@ const CATS = {
   en: { all: "All", people: "People", commercial: "Commercial", film: "Film", landscape: "Landscape" }
 };
 const UI = {
-  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
-  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
+  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", frames: "bilder", soon: "Bilder kommer", drag: "Dra eller sveip for å bla", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
+  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", frames: "frames", soon: "Images coming", drag: "Drag or swipe to browse", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
 };
 const ACCENT = "oklch(0.55 0.095 45)";
 const ACCENT_LIGHT = "oklch(0.72 0.095 45)";
@@ -23,36 +23,90 @@ function heroMedia() {
   return '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#1c1916 0 6px,#171412 6px 12px)"></div>';
 }
 
-function workGrid() {
-  return DATA.work.map((w, i) => {
-    const dim = (cat === "all" || cat === w.cat) ? 1 : 0.2;
-    const mt = w.offset ? "clamp(16px,3.4vw,64px)" : "0px";
-    const alt = esc(L(w, "title") + " — " + (w.meta || ""));
-    const fill = w.image
-      ? '<div style="position:absolute;inset:0;background-image:url(' + esc(media(w.image)) + ');background-size:cover;background-position:center"></div>'
-      : '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
-    return '<div class="reveal" style="grid-column:span ' + w.span + '">'
-      + '<figure style="margin:' + mt + ' 0 0;opacity:' + dim + ';transition:opacity 500ms ease">'
-      + '<div class="tile" role="img" aria-label="' + alt + '" style="position:relative;width:100%;aspect-ratio:' + w.ratio + ';background:#e6e1d6;overflow:hidden">'
-      + fill
-      + '<div class="veil" style="position:absolute;inset:0;background:#12100e;opacity:0;transition:opacity 600ms cubic-bezier(.16,1,.3,1)"></div>'
-      + '<div style="position:absolute;left:14px;top:12px;font-family:' + SERIF + ';font-size:14px;color:rgba(22,19,15,0.35)">' + String(i + 1).padStart(2, "0") + '</div>'
-      + '<div class="cap" style="position:absolute;left:0;right:0;bottom:0;padding:20px 18px;display:grid;gap:4px;color:#f4f1ea;opacity:0;transform:translateY(12px);transition:opacity 500ms ease,transform 600ms cubic-bezier(.16,1,.3,1)">'
-      + '<span style="font-family:' + SERIF + ';font-weight:300;font-size:clamp(20px,2.2vw,30px);line-height:1.1">' + esc(L(w, "title")) + '</span>'
-      + '<span style="font-family:' + SERIF + ';font-style:italic;font-size:15px;color:rgba(244,241,234,0.6)">' + esc(L(w, "line")) + '</span>'
-      + '</div></div>'
-      + '<figcaption style="display:flex;justify-content:space-between;gap:16px;margin-top:11px;font-family:' + SERIF + ';font-size:14.5px;color:rgba(22,19,15,0.55)">'
-      + '<span>' + esc(L(w, "title")) + '</span><span style="font-style:italic;opacity:0.7">' + esc(w.meta || "") + '</span>'
-      + '</figcaption></figure></div>';
+const CATORDER = ["people", "commercial", "film", "landscape"];
+
+const projImgs = (w) => {
+  const l = (Array.isArray(w.images) ? w.images : []).filter(Boolean);
+  return l.length ? l : (w.image ? [w.image] : []);
+};
+const byCat = () => {
+  const m = {};
+  (DATA.work || []).forEach((w, i) => { if (w.cat) (m[w.cat] = m[w.cat] || []).push(i); });
+  return m;
+};
+const catCount = (idx) => idx.reduce((a, i) => a + projImgs(DATA.work[i]).length, 0);
+
+function frames(i) {
+  const w = DATA.work[i], imgs = projImgs(w);
+  if (!imgs.length) return '<div style="flex:none;height:100%;aspect-ratio:3 / 2;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
+  const alt = esc(L(w, "title") + " — " + (w.meta || ""));
+  return imgs.map((src, j) =>
+    '<button class="fr" data-p="' + i + '" data-i="' + j + '" aria-label="' + alt + ' (' + (j + 1) + '/' + imgs.length + ')" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
+    + '<img src="' + esc(media(src)) + '" alt="" loading="lazy" decoding="async" style="display:block;height:100%;width:auto;max-width:none">'
+    + '</button>'
+  ).join("");
+}
+
+function workStrips() {
+  const m = byCat();
+  return CATORDER.filter((c) => m[c] && m[c].length).map((c) => {
+    const n = catCount(m[c]);
+    return '<section class="reveal" id="cat-' + c + '" style="margin-bottom:clamp(48px,6.5vw,92px);scroll-margin-top:86px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:15px">'
+      + '<h3 style="margin:0;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(CATS[lang][c]) + '</h3>'
+      + '<span style="font-family:' + SERIF + ';font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.4);white-space:nowrap">' + (n ? n + " " + UI[lang].frames : UI[lang].soon) + '</span>'
+      + '</div>'
+      + '<div class="strip" tabindex="0" style="display:flex;gap:clamp(28px,3.6vw,56px);overflow-x:auto;margin-right:-32px;padding-right:32px">'
+      + m[c].map((i) => {
+        const w = DATA.work[i];
+        return '<div style="flex:none;display:flex;flex-direction:column;gap:11px">'
+          + '<div style="display:flex;gap:8px;height:clamp(215px,30vh,370px)">' + frames(i) + '</div>'
+          + '<div style="position:sticky;left:0;align-self:flex-start;display:flex;flex-wrap:wrap;gap:2px 11px;font-family:' + SERIF + ';font-size:14.5px">'
+          + '<span>' + esc(L(w, "title")) + '</span>'
+          + '<span style="font-style:italic;color:rgba(22,19,15,0.45)">' + esc(w.meta || "") + '</span>'
+          + '</div></div>';
+      }).join("")
+      + '</div>'
+      + '<div class="bar" style="overflow:hidden;height:1px;margin-top:21px;background:rgba(22,19,15,0.13)"><i style="display:block;height:1px;width:0;background:' + ACCENT + '"></i></div>'
+      + '</section>';
   }).join("");
 }
 
-function filters() {
-  return Object.keys(CATS[lang]).map((k) => {
-    const n = k === "all" ? DATA.work.length : DATA.work.filter((w) => w.cat === k).length;
-    if (!n) return "";
-    return '<span data-cat="' + k + '" style="cursor:pointer;padding-bottom:3px;color:' + (cat === k ? "#16130f" : "rgba(22,19,15,0.42)") + ';border-bottom:1px solid ' + (cat === k ? ACCENT : "transparent") + ';transition:color 300ms ease,border-color 300ms ease">' + esc(CATS[lang][k]) + '<span style="font-size:0.62em;vertical-align:super;margin-left:5px;opacity:0.5">' + n + '</span></span>';
-  }).join("");
+function catNav() {
+  const m = byCat();
+  return CATORDER.filter((c) => m[c] && m[c].length).map((c) =>
+    '<a href="#cat-' + c + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(CATS[lang][c])
+    + '<span style="font-size:0.62em;vertical-align:super;margin-left:5px;opacity:0.55">' + catCount(m[c]) + '</span></a>'
+  ).join("");
+}
+
+let lbP = -1, lbI = 0;
+function lbOpen(p, i) { lbP = p; lbI = i; document.body.style.overflow = "hidden"; lbDraw(); }
+function lbClose() { lbP = -1; document.body.style.overflow = ""; const e = document.getElementById("lb"); if (e) e.style.display = "none"; }
+function lbGo(d) { if (lbP < 0) return; const n = projImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw(); }
+function lbDraw() {
+  const el = document.getElementById("lb"); if (!el || lbP < 0) return;
+  const w = DATA.work[lbP], imgs = projImgs(w); if (!imgs.length) return;
+  el.style.display = "flex";
+  const im = document.getElementById("lb-img");
+  im.src = media(imgs[lbI]);
+  im.alt = L(w, "title") + " — " + (w.meta || "");
+  document.getElementById("lb-cap").innerHTML =
+    '<span style="color:rgba(244,241,234,0.9)">' + esc(L(w, "title")) + '<span style="font-style:italic;color:rgba(244,241,234,0.5)"> — ' + esc(L(w, "line")) + '</span></span>'
+    + '<span style="font-style:italic">' + esc(w.meta || "") + ' · ' + (lbI + 1) + " / " + imgs.length + '</span>';
+  const vis = imgs.length > 1 ? "block" : "none";
+  document.getElementById("lb-prev").style.display = vis;
+  document.getElementById("lb-next").style.display = vis;
+  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s); });
+}
+if (!window.__smKeys) {
+  window.__smKeys = 1;
+  document.addEventListener("keydown", (e) => {
+    if (lbP < 0) return;
+    if (e.key === "Escape") lbClose();
+    else if (e.key === "ArrowRight") lbGo(1);
+    else if (e.key === "ArrowLeft") lbGo(-1);
+  });
 }
 
 function render() {
@@ -86,11 +140,14 @@ function render() {
   </section>
 
   <section id="work" style="padding:0 32px clamp(70px,10vw,140px)">
-    <div class="reveal" style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(22,19,15,0.16);padding-bottom:14px;margin-bottom:clamp(28px,4vw,56px);font-family:${SERIF};font-size:15px">
+    <div class="reveal" style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(22,19,15,0.16);padding-bottom:14px;margin-bottom:clamp(24px,3.4vw,44px);font-family:${SERIF};font-size:15px">
       <span>${u.work}</span><span style="opacity:0.45;font-style:italic">2019 — 2026</span>
     </div>
-    <div id="filters" class="reveal" style="display:flex;flex-wrap:wrap;gap:8px 26px;align-items:baseline;margin-bottom:clamp(30px,4.5vw,60px);font-family:${SERIF};font-weight:300;font-size:clamp(16px,1.6vw,22px)">${filters()}</div>
-    <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(16px,2.6vw,46px) clamp(14px,2vw,30px);align-items:start">${workGrid()}</div>
+    <div id="filters" class="reveal" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:12px 30px;margin-bottom:clamp(30px,4.5vw,58px);font-family:${SERIF};font-weight:300;font-size:clamp(16px,1.6vw,22px)">
+      <div style="display:flex;flex-wrap:wrap;gap:8px 26px;align-items:baseline">${catNav()}</div>
+      <span style="font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.38)">${u.drag}</span>
+    </div>
+    ${workStrips()}
   </section>
 
   <section id="about" style="background:#12100e;color:#f4f1ea;padding:clamp(90px,13vw,180px) 32px">
@@ -159,7 +216,15 @@ function render() {
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-top:clamp(50px,8vw,110px);border-top:1px solid rgba(244,241,234,0.14);padding-top:22px;font-family:${SERIF};font-size:14px;color:rgba(244,241,234,0.4)">
       <span>Sataøen Media © 2026</span><span>${u.worldwide}</span>
     </div>
-  </section>`;
+  </section>
+
+  <div id="lb" style="position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:clamp(14px,3.5vw,58px);background:rgba(14,12,10,0.97)">
+    <img id="lb-img" alt="" style="display:block;max-width:100%;max-height:100%;object-fit:contain">
+    <button id="lb-prev" aria-label="${u.prev}" style="position:absolute;left:0;top:0;bottom:0;width:clamp(56px,13vw,170px);border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:40px;opacity:0.4;cursor:pointer;transition:opacity 300ms ease">&lsaquo;</button>
+    <button id="lb-next" aria-label="${u.next}" style="position:absolute;right:0;top:0;bottom:0;width:clamp(56px,13vw,170px);border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:40px;opacity:0.4;cursor:pointer;transition:opacity 300ms ease">&rsaquo;</button>
+    <button id="lb-close" aria-label="${u.close}" style="position:absolute;top:14px;right:20px;border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:30px;line-height:1;opacity:0.5;cursor:pointer;transition:opacity 300ms ease">&times;</button>
+    <div id="lb-cap" style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 24px;padding:18px clamp(20px,4vw,34px);font-family:${SERIF};font-size:14.5px;color:rgba(244,241,234,0.6);pointer-events:none"></div>
+  </div>`;
 
   wire();
 }
@@ -168,12 +233,46 @@ function wire() {
   document.querySelectorAll("[data-lang]").forEach((el) => el.addEventListener("click", () => {
     lang = el.dataset.lang; localStorage.setItem("sm-lang", lang); render();
   }));
-  document.querySelectorAll("#filters [data-cat]").forEach((el) => el.addEventListener("click", () => { cat = el.dataset.cat; render(); }));
-  document.querySelectorAll(".tile").forEach((t) => {
-    const veil = t.querySelector(".veil"), capt = t.querySelector(".cap");
-    t.addEventListener("mouseenter", () => { veil.style.opacity = 0.82; capt.style.opacity = 1; capt.style.transform = "none"; });
-    t.addEventListener("mouseleave", () => { veil.style.opacity = 0; capt.style.opacity = 0; capt.style.transform = "translateY(12px)"; });
+  lbClose();
+  document.querySelectorAll(".strip").forEach((s) => {
+    const bar = s.parentElement.querySelector(".bar"), fill = bar.querySelector("i");
+    const upd = () => {
+      const max = s.scrollWidth - s.clientWidth;
+      if (max < 4) { bar.style.opacity = 0; return; }
+      const frac = s.clientWidth / s.scrollWidth;
+      bar.style.opacity = 1;
+      fill.style.width = (frac * 100) + "%";
+      fill.style.transform = "translateX(" + ((1 - frac) / frac) * (s.scrollLeft / max) * 100 + "%)";
+    };
+    s.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    s.querySelectorAll("img").forEach((im) => { if (!im.complete) im.addEventListener("load", upd, { once: true }); });
+    upd();
+    let down = false, sx = 0, sl = 0, moved = false;
+    s.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "touch") return;
+      down = true; moved = false; sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
+    });
+    s.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      const dx = e.clientX - sx;
+      if (Math.abs(dx) > 4) moved = true;
+      s.scrollLeft = sl - dx;
+    });
+    const end = () => { down = false; s.style.cursor = ""; };
+    s.addEventListener("pointerup", end);
+    s.addEventListener("pointercancel", end);
+    s.addEventListener("pointerleave", end);
+    s.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   });
+  document.querySelectorAll(".fr").forEach((f) => f.addEventListener("click", () => lbOpen(+f.dataset.p, +f.dataset.i)));
+  const lb = document.getElementById("lb");
+  if (lb) {
+    lb.addEventListener("click", (e) => { if (e.target === lb) lbClose(); });
+    document.getElementById("lb-close").addEventListener("click", lbClose);
+    document.getElementById("lb-prev").addEventListener("click", () => lbGo(-1));
+    document.getElementById("lb-next").addEventListener("click", () => lbGo(1));
+  }
   const form = document.getElementById("inq");
   if (form) form.addEventListener("submit", (e) => {
     e.preventDefault();
