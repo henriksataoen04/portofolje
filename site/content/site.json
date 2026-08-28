@@ -57,6 +57,37 @@
       ]
     },
     {
+      "name_no": "Sport",
+      "name_en": "Sport",
+      "images": [
+        "/media/birken-forste-utkast-bilder-00000003.webp",
+        "/media/birken-forste-utkast-bilder-00000004.webp",
+        "/media/birken-forste-utkast-bilder-00000009.webp",
+        "/media/birken-forste-utkast-bilder-00000011.webp",
+        "/media/birken-forste-utkast-bilder-00000013.webp",
+        "/media/birken-forste-utkast-bilder-00000014.webp"
+      ]
+    },
+    {
+      "name_no": "Konsert & kultur",
+      "name_en": "Concerts & culture",
+      "images": [
+        "/media/290426-limpi-konsert-1.webp",
+        "/media/290426-limpi-konsert-2.webp",
+        "/media/290426-limpi-konsert-3.webp",
+        "/media/290426-limpi-konsert-4.webp",
+        "/media/290426-limpi-konsert-5.webp",
+        "/media/290426-limpi-konsert-6.webp"
+      ]
+    },
+    {
+      "name_no": "Reportasje",
+      "name_en": "Reportage",
+      "images": [
+        "/media/ubat-tur-tyskland-20240614-154.webp"
+      ]
+    },
+    {
       "name_no": "Portrett",
       "name_en": "Portraits",
       "images": [
@@ -67,42 +98,12 @@
       ]
     },
     {
-      "name_no": "Editorial & mote",
-      "name_en": "Editorial & fashion",
-      "images": [
-        "/media/ubat-tur-tyskland-20240614-154.webp"
-      ]
-    },
-    {
-      "name_no": "Merkevare",
-      "name_en": "Brand",
-      "images": []
-    },
-    {
       "name_no": "Eiendom",
       "name_en": "Property",
       "images": [
         "/media/kantarellen-terrasse-21-3.webp",
         "/media/kristiandsands-gate-12a-20240801-6.webp",
         "/media/kristiandsands-gate-12a-20240801-8.webp"
-      ]
-    },
-    {
-      "name_no": "Arrangement",
-      "name_en": "Events",
-      "images": [
-        "/media/290426-limpi-konsert-1.webp",
-        "/media/290426-limpi-konsert-2.webp",
-        "/media/290426-limpi-konsert-3.webp",
-        "/media/290426-limpi-konsert-4.webp",
-        "/media/290426-limpi-konsert-5.webp",
-        "/media/290426-limpi-konsert-6.webp",
-        "/media/birken-forste-utkast-bilder-00000003.webp",
-        "/media/birken-forste-utkast-bilder-00000004.webp",
-        "/media/birken-forste-utkast-bilder-00000009.webp",
-        "/media/birken-forste-utkast-bilder-00000011.webp",
-        "/media/birken-forste-utkast-bilder-00000013.webp",
-        "/media/birken-forste-utkast-bilder-00000014.webp"
       ]
     },
     {
