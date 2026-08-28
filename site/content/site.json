@@ -47,16 +47,6 @@
   ],
   "work": [
     {
-      "name_no": "Bryllup",
-      "name_en": "Weddings",
-      "images": [
-        "/media/eivind-jannicke-bryllup-08-08-2026-44.webp",
-        "/media/eivind-jannicke-bryllup-08-08-2026-96.webp",
-        "/media/eivind-jannicke-bryllup-08-08-2026-112.webp",
-        "/media/eivind-jannicke-bryllup-08-08-2026-118.webp"
-      ]
-    },
-    {
       "name_no": "Sport",
       "name_en": "Sport",
       "images": [
@@ -66,18 +56,6 @@
         "/media/birken-forste-utkast-bilder-00000011.webp",
         "/media/birken-forste-utkast-bilder-00000013.webp",
         "/media/birken-forste-utkast-bilder-00000014.webp"
-      ]
-    },
-    {
-      "name_no": "Konsert & kultur",
-      "name_en": "Concerts & culture",
-      "images": [
-        "/media/290426-limpi-konsert-1.webp",
-        "/media/290426-limpi-konsert-2.webp",
-        "/media/290426-limpi-konsert-3.webp",
-        "/media/290426-limpi-konsert-4.webp",
-        "/media/290426-limpi-konsert-5.webp",
-        "/media/290426-limpi-konsert-6.webp"
       ]
     },
     {
@@ -99,6 +77,18 @@
       ]
     },
     {
+      "name_no": "Konsert & kultur",
+      "name_en": "Concerts & culture",
+      "images": [
+        "/media/290426-limpi-konsert-1.webp",
+        "/media/290426-limpi-konsert-2.webp",
+        "/media/290426-limpi-konsert-3.webp",
+        "/media/290426-limpi-konsert-4.webp",
+        "/media/290426-limpi-konsert-5.webp",
+        "/media/290426-limpi-konsert-6.webp"
+      ]
+    },
+    {
       "name_no": "Portrett",
       "name_en": "Portraits",
       "images": [
@@ -115,6 +105,16 @@
         "/media/kantarellen-terrasse-21-3.webp",
         "/media/kristiandsands-gate-12a-20240801-6.webp",
         "/media/kristiandsands-gate-12a-20240801-8.webp"
+      ]
+    },
+    {
+      "name_no": "Bryllup",
+      "name_en": "Weddings",
+      "images": [
+        "/media/eivind-jannicke-bryllup-08-08-2026-44.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-96.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-112.webp",
+        "/media/eivind-jannicke-bryllup-08-08-2026-118.webp"
       ]
     },
     {
