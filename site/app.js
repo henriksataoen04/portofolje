@@ -276,9 +276,18 @@ function loop(t) {
   }
   for (const st of STRIPS) {
     if (!st.go) continue;
-    let next = (st.cur + st.vel * dt) % st.shift;
-    if (next < 0) next += st.shift;
-    st.el.scrollLeft = next;
+    // Posisjonen foeres som flyttall her, ikke leses tilbake fra elementet.
+    // WebKit runder scrollLeft til hele piksler, og et tillegg paa en halv
+    // piksel per ramme blir da aldri til noe: verdien skrives, rundes bort,
+    // leses tilbake uendret, og stripa staar bom stille. Blink lagrer
+    // desimaler, saa feilen fantes bare paa iPhone og iPad.
+    // written er verdien nettleseren faktisk lagret sist. Avviker den fra
+    // det vi leser naa, har brukeren flyttet stripa, og vi tar opp derfra.
+    if (Math.abs(st.cur - st.written) > 1.5) st.pos = st.cur;
+    st.pos = (st.pos + st.vel * dt) % st.shift;
+    if (st.pos < 0) st.pos += st.shift;
+    st.el.scrollLeft = st.pos;
+    st.written = st.el.scrollLeft;
   }
   if (alive) { RAF = requestAnimationFrame(loop); } else { RAF = null; LAST = 0; }
 }
@@ -305,7 +314,7 @@ function wire() {
   document.querySelectorAll(".strip").forEach((s) => {
     const orig = [].slice.call(s.children);
     const st = { el: s, n: s.querySelectorAll(".fr").length, on: false, visible: false,
-      hover: false, drag: false, shift: 0, vel: SPEED,
+      hover: false, drag: false, shift: 0, vel: SPEED, pos: 0, written: 0,
       // Kopiene er usynlige for skjermlesere og tastatur, men klikkbare.
       tpl: orig.map((k) => {
         const c = k.cloneNode(true);
