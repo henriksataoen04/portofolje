@@ -214,36 +214,46 @@ function render() {
   wire();
 }
 
-const DRIFT = 0.62;
+const SPEED = 32;
 const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-let STRIPS = [];
+let STRIPS = [], RAF = null, LAST = 0;
 
-function driftTick() {
-  const vh = window.innerHeight;
+const measure = (st) => {
+  st.max = st.el.scrollWidth - st.el.clientWidth;
+  st.frac = st.el.clientWidth / st.el.scrollWidth;
+};
+const paint = (st) => {
+  if (st.max < 4) { st.bar.style.opacity = 0; return; }
+  st.bar.style.opacity = 1;
+  st.fill.style.width = (st.frac * 100) + "%";
+  st.fill.style.transform = "translateX(" + ((1 - st.frac) / st.frac) * (st.el.scrollLeft / st.max) * 100 + "%)";
+};
+
+// Hver stripe glir av seg selv naar den kommer til syne, ikke i takt med
+// skrollen. Musepekeren over setter den paa pause, saa bildet ikke sklir
+// unna mens du sikter. Tar du tak i den, stopper den for godt.
+function loop(t) {
+  const dt = LAST ? Math.min((t - LAST) / 1000, 0.1) : 0;
+  LAST = t;
+  let alive = 0;
   for (const st of STRIPS) {
-    if (!st.auto) continue;
-    const max = st.el.scrollWidth - st.el.clientWidth;
-    if (max < 4) continue;
-    const r = st.el.getBoundingClientRect();
-    let p = (vh - r.top) / (vh + r.height);
-    p = (p - st.delay) / (1 - st.delay);
-    p = p < 0 ? 0 : p > 1 ? 1 : p;
-    const v = p * max * DRIFT;
-    st.set = v;
-    st.el.scrollLeft = v;
+    if (!st.auto || st.max < 4 || st.pos >= st.max) continue;
+    alive++;
+    if (!st.visible || st.hover) continue;
+    st.pos = Math.min(st.max, st.pos + SPEED * dt);
+    st.set = st.pos;
+    st.el.scrollLeft = st.pos;
   }
+  if (alive) { RAF = requestAnimationFrame(loop); } else { RAF = null; LAST = 0; }
 }
+const startLoop = () => { if (RAF === null) { LAST = 0; RAF = requestAnimationFrame(loop); } };
 
-if (!window.__smDrift) {
-  window.__smDrift = 1;
-  let queued = false;
-  const tick = () => {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(() => { queued = false; driftTick(); });
-  };
-  window.addEventListener("scroll", tick, { passive: true });
-  window.addEventListener("resize", () => { for (const st of STRIPS) if (st.upd) st.upd(); tick(); });
+if (!window.__smResize) {
+  window.__smResize = 1;
+  window.addEventListener("resize", () => {
+    for (const st of STRIPS) { measure(st); paint(st); }
+    startLoop();
+  });
 }
 
 function wire() {
@@ -252,23 +262,27 @@ function wire() {
   }));
   lbClose();
   STRIPS = [];
-  document.querySelectorAll(".strip").forEach((s, i) => {
-    const bar = s.parentElement.querySelector(".bar"), fill = bar.querySelector("i");
-    const st = { el: s, auto: !REDUCED, delay: (i % 3) * 0.09, set: 0, upd: null };
-    const upd = () => {
-      const max = s.scrollWidth - s.clientWidth;
-      if (max < 4) { bar.style.opacity = 0; return; }
-      if (st.auto && Math.abs(s.scrollLeft - st.set) > 2) st.auto = false;
-      const frac = s.clientWidth / s.scrollWidth;
-      bar.style.opacity = 1;
-      fill.style.width = (frac * 100) + "%";
-      fill.style.transform = "translateX(" + ((1 - frac) / frac) * (s.scrollLeft / max) * 100 + "%)";
-    };
-    st.upd = upd;
+  const seen = new IntersectionObserver((es) => es.forEach((e) => {
+    const st = STRIPS.find((x) => x.el === e.target);
+    if (!st) return;
+    st.visible = e.isIntersecting;
+    if (e.isIntersecting) startLoop();
+  }), { rootMargin: "0px 0px -12% 0px" });
+  document.querySelectorAll(".strip").forEach((s) => {
+    const bar = s.parentElement.querySelector(".bar");
+    const st = { el: s, bar: bar, fill: bar.querySelector("i"), auto: !REDUCED,
+      visible: false, hover: false, pos: s.scrollLeft || 0, set: s.scrollLeft || 0, max: 0, frac: 1 };
     STRIPS.push(st);
-    s.addEventListener("scroll", upd, { passive: true });
-    s.querySelectorAll("img").forEach((im) => { if (!im.complete) im.addEventListener("load", upd, { once: true }); });
-    upd();
+    measure(st); paint(st);
+    s.addEventListener("scroll", () => {
+      if (st.auto && Math.abs(s.scrollLeft - st.set) > 2) st.auto = false;
+      paint(st);
+    }, { passive: true });
+    s.querySelectorAll("img").forEach((im) => {
+      if (!im.complete) im.addEventListener("load", () => { measure(st); paint(st); startLoop(); }, { once: true });
+    });
+    s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
+    seen.observe(s);
     let down = false, sx = 0, sl = 0, moved = false;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
@@ -283,10 +297,9 @@ function wire() {
     const end = () => { down = false; s.style.cursor = ""; };
     s.addEventListener("pointerup", end);
     s.addEventListener("pointercancel", end);
-    s.addEventListener("pointerleave", end);
+    s.addEventListener("pointerleave", () => { end(); st.hover = false; startLoop(); });
     s.addEventListener("click", (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   });
-  driftTick();
   document.querySelectorAll(".fr").forEach((f) => f.addEventListener("click", () => lbOpen(+f.dataset.p, +f.dataset.i)));
   const lb = document.getElementById("lb");
   if (lb) {
