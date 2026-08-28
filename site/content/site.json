@@ -1,11 +1,18 @@
 {
-  "contact": {
-    "email": "sataoenmedia@gmail.com",
-    "phone": "+47 918 11 553",
-    "instagram": "@sataoenmedia"
+  "hero": {
+    "video": "/media/norgesferie-enkeltklipp-web.mp4",
+    "image": "",
+    "kicker_no": "Foto & film",
+    "kicker_en": "Photography & film"
   },
-  "about3_en": "I also work as a multicamera operator in broadcast — among others Birken, the Junior World Ski Championships and Landsskytterstevnet. After interning at NRK Promo as the project lead's right hand, I take on project coordination work as well.",
+  "statement_no": "Bilder og film som forteller en historie — og som får frem en følelse.",
+  "statement_en": "Stills and film that tell a story — and hold on to a feeling.",
+  "about_no": "Jeg har tatt bilder siden jeg var barn, og har bachelor i tv-produksjon fra TV-skolen.",
+  "about_en": "I've been taking pictures since I was a child, and hold a bachelor's in TV production from TV-skolen.",
+  "about2_no": "Jeg jobber rolig og nært. Bryllup, portrett, editorial, merkevare, eiendom, landskap — samme tilnærming hver gang: se etter det som faktisk skjer, og la det være. Base i Geilo, Lillehammer og Oslo, men jeg reiser gjerne.",
   "about2_en": "I work quietly and close. Weddings, portraits, editorial, brand, property, landscape — same approach every time: look for what is actually happening, and let it be. Based in Geilo, Lillehammer and Oslo; happy to travel.",
+  "about3_no": "Jeg jobber også som flerkamerafotograf i tv-bransjen, blant annet på Birken, Junior-VM i langrenn og Landsskytterstevnet. Etter praksis i NRK Promo, som prosjektlederens høyre hånd, tar jeg gjerne oppgaver som prosjektkoordinator også.",
+  "about3_en": "I also work as a multicamera operator in broadcast — among others Birken, the Junior World Ski Championships and Landsskytterstevnet. After interning at NRK Promo as the project lead's right hand, I take on project coordination work as well.",
   "facts": [
     {
       "label_no": "Utdanning",
@@ -38,22 +45,15 @@
       "value_en": "Worldwide"
     }
   ],
-  "clients": [
-    "NRK",
-    "Birken",
-    "Junior-VM i langrenn",
-    "Landsskytterstevnet",
-    "Visit Geilo",
-    "Stisema",
-    "Olympiaparken",
-    "Norrøna"
-  ],
-  "statement_no": "Bilder og film som forteller en historie — og som får frem en følelse.",
   "work": [
     {
       "name_no": "Bryllup",
       "name_en": "Weddings",
-      "images": []
+      "images": [
+        "/media/Eivind & Jannicke Bryllup 08.08.2026-34.jpg",
+        "/media/Eivind & Jannicke Bryllup 08.08.2026-54.jpg",
+        "/media/Eivind & Jannicke Bryllup 08.08.2026-88.jpg"
+      ]
     },
     {
       "name_no": "Portrett",
@@ -87,25 +87,7 @@
     }
   ],
   "broadcast_intro_no": "Direktesendt sport og arrangement. Jeg kjenner kø, kommunikasjon og tempoet i en flerkameraproduksjon — og leverer like rolig når det er live.",
-  "about_no": "Jeg har tatt bilder siden jeg var barn, og har bachelor i tv-produksjon fra TV-skolen.",
-  "quotes": [
-    {
-      "text_no": "Han er der uten at man merker det, og bildene ble akkurat slik dagen føltes.",
-      "text_en": "He was there without anyone noticing, and the images felt exactly like the day did.",
-      "by": "Bryllup, Geilo"
-    },
-    {
-      "text_no": "Leverte over det vi ba om, og gjorde det enkelt for oss.",
-      "text_en": "Delivered beyond the brief and made the whole thing easy for us.",
-      "by": "Merkevarekunde, Oslo"
-    },
-    {
-      "text_no": "Rolig, presis og lett å jobbe med. Vi bruker ham igjen.",
-      "text_en": "Calm, precise, easy to work with. We'll book him again.",
-      "by": "Byrå, Lillehammer"
-    }
-  ],
-  "statement_en": "Stills and film that tell a story — and hold on to a feeling.",
+  "broadcast_intro_en": "Live sport and events. I know the queue, the comms and the pace of a multicamera gallery — and I stay just as calm when it goes live.",
   "credits": [
     {
       "production": "Birken",
@@ -132,16 +114,6 @@
       "year": "2023"
     }
   ],
-  "broadcast_intro_en": "Live sport and events. I know the queue, the comms and the pace of a multicamera gallery — and I stay just as calm when it goes live.",
-  "about3_no": "Jeg jobber også som flerkamerafotograf i tv-bransjen, blant annet på Birken, Junior-VM i langrenn og Landsskytterstevnet. Etter praksis i NRK Promo, som prosjektlederens høyre hånd, tar jeg gjerne oppgaver som prosjektkoordinator også.",
-  "hero": {
-    "video": "/media/norgesferie-enkeltklipp-web.mp4",
-    "image": "",
-    "kicker_no": "Foto & film",
-    "kicker_en": "Photography & film"
-  },
-  "about2_no": "Jeg jobber rolig og nært. Bryllup, portrett, editorial, merkevare, eiendom, landskap — samme tilnærming hver gang: se etter det som faktisk skjer, og la det være. Base i Geilo, Lillehammer og Oslo, men jeg reiser gjerne.",
-  "about_en": "I've been taking pictures since I was a child, and hold a bachelor's in TV production from TV-skolen.",
   "services": [
     {
       "name_no": "Bryllup",
@@ -191,5 +163,37 @@
       "desc_no": "Koordinering og produksjonsledelse. Praksis i NRK Promoavdeling",
       "desc_en": "Coordination and production management. Interned at NRK Promo."
     }
-  ]
+  ],
+  "clients": [
+    "NRK",
+    "Birken",
+    "Junior-VM i langrenn",
+    "Landsskytterstevnet",
+    "Visit Geilo",
+    "Stisema",
+    "Olympiaparken",
+    "Norrøna"
+  ],
+  "quotes": [
+    {
+      "text_no": "Han er der uten at man merker det, og bildene ble akkurat slik dagen føltes.",
+      "text_en": "He was there without anyone noticing, and the images felt exactly like the day did.",
+      "by": "Bryllup, Geilo"
+    },
+    {
+      "text_no": "Leverte over det vi ba om, og gjorde det enkelt for oss.",
+      "text_en": "Delivered beyond the brief and made the whole thing easy for us.",
+      "by": "Merkevarekunde, Oslo"
+    },
+    {
+      "text_no": "Rolig, presis og lett å jobbe med. Vi bruker ham igjen.",
+      "text_en": "Calm, precise, easy to work with. We'll book him again.",
+      "by": "Byrå, Lillehammer"
+    }
+  ],
+  "contact": {
+    "email": "sataoenmedia@gmail.com",
+    "phone": "+47 918 11 553",
+    "instagram": "@sataoenmedia"
+  }
 }
