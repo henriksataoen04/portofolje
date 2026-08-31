@@ -62,8 +62,7 @@ function workStrips() {
 
 function catNav() {
   return (DATA.work || []).map((c) =>
-    '<a href="#' + slug(c.name_no) + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(L(c, "name"))
-    + '<span style="font-size:0.62em;vertical-align:super;margin-left:5px;opacity:0.55">' + catImgs(c).length + '</span></a>'
+    '<a href="#' + slug(c.name_no) + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(L(c, "name")) + '</a>'
   ).join("");
 }
 
