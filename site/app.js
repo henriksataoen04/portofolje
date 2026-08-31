@@ -7,7 +7,11 @@ const ACCENT_LIGHT = "oklch(0.72 0.095 45)";
 const SERIF = "Newsreader, Georgia, serif";
 const saved = localStorage.getItem("sm-lang");
 let DATA = null;
-let lang = (saved === "en" || saved === "no") ? saved : ((navigator.language || "").startsWith("en") ? "en" : "no");
+// Norsk er standard for alle. Kundene er norske, og den prerendrede
+// HTML-en er norsk — leste vi nettleserspraaket, ville siden blinket fra
+// norsk til engelsk hos alle med engelsk nettleser. Har man valgt EN selv,
+// huskes det.
+let lang = (saved === "en" || saved === "no") ? saved : "no";
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const L = (o, k) => o[k + "_" + lang] || o[k + "_no"] || o[k] || "";
 const seg = (s) => { try { return encodeURIComponent(decodeURIComponent(s)); } catch (e) { return encodeURIComponent(s); } };
