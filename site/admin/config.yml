@@ -29,7 +29,9 @@ media_libraries:
         optimize: true
 
 publish_mode: simple
-site_url: /
+# Maa vaere en full adresse. Sveltia 0.212.1 begynte aa avvise "/" og
+# viste en feilside i stedet for CMS-en.
+site_url: https://sataoenmedia.no
 logo_url: /favicon.svg
 
 collections:
