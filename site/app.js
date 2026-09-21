@@ -162,6 +162,25 @@ function lbReset() {
   if (im) { im.style.opacity = ""; im.style.transformOrigin = ""; }
 }
 
+// Gjoer et lightbox-bilde om til en kopi som ligger fast akkurat der det ses
+// naa, uansett hvilken bevegelse det er midt i. Returnerer plassen.
+function lbFreeze(img) {
+  const r = img.getBoundingClientRect();
+  if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
+  img.removeAttribute("id");
+  img.className = "lb-ghost";
+  img.setAttribute("aria-hidden", "true");
+  img.style.cssText = "position:fixed;margin:0;pointer-events:none;object-fit:contain;left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;height:" + r.height + "px";
+  return r;
+}
+// Et nytt, tomt lightbox-bilde rett etter kopien, midt paa skjermen.
+function lbFresh(after) {
+  const n = document.createElement("img");
+  n.id = "lb-img"; n.alt = ""; n.style.cssText = LB_IMG;
+  after.after(n);
+  return n;
+}
+
 // Pilene blar som paa en filmstripe: bildet du ser glir ut til den ene siden
 // mens det neste glir inn fra den andre, i samme tempo som naar et bilde
 // aapnes. Begge flyttes like langt, saa avstanden mellom dem holder seg.
@@ -184,16 +203,9 @@ function lbGo(d) {
   // bilde, er det den ventende kopien som viser hva som staar paa skjermen.
   let g = lbPending;
   if (!g && im.style.opacity !== "0") {
-    const r = im.getBoundingClientRect();
-    if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
     g = im;
-    g.removeAttribute("id");
-    g.className = "lb-ghost";
-    g.setAttribute("aria-hidden", "true");
-    g.style.cssText = "position:fixed;margin:0;pointer-events:none;object-fit:contain;left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;height:" + r.height + "px";
-    im = document.createElement("img");
-    im.id = "lb-img"; im.alt = ""; im.style.cssText = LB_IMG;
-    g.after(im);
+    lbFreeze(g);
+    im = lbFresh(g);
   }
   if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
   im.style.opacity = "0";
@@ -237,6 +249,108 @@ function lbDraw() {
   const n = imgs.length;
   imgs.forEach((s, j) => { if (j !== lbI && (j === (lbI + 1) % n || j === (lbI - 1 + n) % n)) new Image().src = media(s.src); });
 }
+// Sveip paa mobil: bildet foelger fingeren, og naboen kikker inn fra kanten
+// med samme avstand som naar man blar med pilene. Slipper man langt nok ute,
+// eller med fart, glir det over til naboen. Ellers glir det tilbake.
+// Loddrette bevegelser gjoer ingenting — siden bak skal ikke rulle. To
+// fingre og zoomet inn overlates til nettleseren.
+let lbNoClick = 0;
+function lbSwipe(el) {
+  let s = null;
+  const count = () => catImgs(DATA.work[lbP]).length;
+  // Naboen blir det nye lightbox-bildet. Det staar saa langt ut at det er helt
+  // utenfor kanten, og beveger seg i takt med det gamle.
+  const peek = (d) => {
+    const c = DATA.work[lbP], imgs = catImgs(c), n = imgs.length, nb = imgs[(lbI + d + n) % n], im = s.im;
+    s.d = d;
+    im.style.transform = "";
+    im.src = media(nb.src);
+    im.alt = L(c, "name") + (nb.caption ? " — " + nb.caption : "");
+    const W = el.clientWidth, M = 40, b = im.getBoundingClientRect(), r = s.r;
+    s.D = d > 0 ? Math.max(W - b.left + M, r.right + M) : Math.max(b.right + M, W - r.left + M);
+    // Er bildet ikke hentet ennaa, vet vi ikke stoerrelsen. Regn om naar det er.
+    if (!im.complete || !im.naturalWidth) im.onload = () => { if (s && s.im === im && s.d === d) { peek(d); place(); } };
+  };
+  const place = () => {
+    if (count() < 2) { document.getElementById("lb-img").style.transform = "translateX(" + s.dx / 3 + "px)"; return; }
+    if (!s.g) { s.g = document.getElementById("lb-img"); s.r = lbFreeze(s.g); s.im = lbFresh(s.g); }
+    const d = s.dx < 0 ? 1 : -1;
+    if (d !== s.d) peek(d);
+    s.g.style.transform = "translateX(" + s.dx + "px)";
+    s.im.style.transform = "translateX(" + (s.d * s.D + s.dx) + "px)";
+  };
+  const end = (cancel) => {
+    const c = s; s = null;
+    if (!c || c.axis !== "x") return;
+    lbNoClick = Date.now() + 500;
+    const n = count(), W = el.clientWidth;
+    // Farten de siste 100 ms foer slipp, i px/ms.
+    const last = c.pts[c.pts.length - 1], first = c.pts.find((p) => p[1] >= last[1] - 100) || last;
+    const v = last[1] > first[1] ? (last[0] - first[0]) / (last[1] - first[1]) : 0;
+    const go = !cancel && n > 1 && Math.abs(c.dx) > 10 && (Math.abs(c.dx) > W * 0.2 || (Math.abs(v) > 0.3 && v * c.dx > 0));
+    if (REDUCED) { if (go) lbGo(c.dx < 0 ? 1 : -1); return; }
+    if (!c.g) {
+      // Bare ett bilde i kategorien: det gir litt etter, og spretter tilbake.
+      const im = document.getElementById("lb-img");
+      im.style.transform = "";
+      lbAnim = im.animate([{ transform: "translateX(" + c.dx / 3 + "px)" }, { transform: "none" }], { duration: 380, easing: EASE });
+      lbAnim.onfinish = () => { lbAnim = null; };
+      return;
+    }
+    const g = c.g, im = c.im;
+    if (go) {
+      if (lbSrc) { lbSrc.style.visibility = ""; lbSrc = null; }
+      lbTok++;
+      lbI = (lbI + c.d + n) % n;
+      lbDraw();
+      // Resten av veien, med en varighet som tar opp farten fra fingeren.
+      const from = c.d * c.D + c.dx;
+      const T = Math.max(240, Math.min(560, 6.25 * Math.abs(from) / Math.max(Math.abs(v), 0.01)));
+      g.style.transform = ""; im.style.transform = "";
+      g.animate([{ transform: "translateX(" + c.dx + "px)" }, { transform: "translateX(" + (c.dx - from) + "px)" }], { duration: T, easing: EASE, fill: "forwards" }).onfinish = () => g.remove();
+      lbAnim = im.animate([{ transform: "translateX(" + from + "px)" }, { transform: "none" }], { duration: T, easing: EASE });
+      lbAnim.onfinish = () => { lbAnim = null; };
+    } else {
+      // Tilbake: naboen glir ut igjen, og det gamle bildet tar plassen sin.
+      lbFreeze(im);
+      im.animate([{ transform: "none" }, { transform: "translateX(" + (-c.dx) + "px)" }], { duration: 380, easing: EASE, fill: "forwards" }).onfinish = () => im.remove();
+      const vis = g.getBoundingClientRect();
+      g.id = "lb-img"; g.className = ""; g.removeAttribute("aria-hidden"); g.style.cssText = LB_IMG;
+      const home = g.getBoundingClientRect();
+      g.style.transformOrigin = "0 0";
+      lbAnim = g.animate([{ transform: flip(vis, home) }, { transform: "none" }], { duration: 380, easing: EASE });
+      lbAnim.onfinish = () => { lbAnim = null; };
+    }
+  };
+  el.addEventListener("touchstart", (e) => {
+    if (s) { end(true); return; }   // en finger til: avbryt, la nettleseren zoome
+    if (lbP < 0 || lbClosing || lbPending || e.touches.length !== 1) return;
+    if (window.visualViewport && visualViewport.scale > 1.01) return;
+    const t = e.touches[0];
+    s = { x: t.clientX, y: t.clientY, dx: 0, axis: "", d: 0, D: 0, g: null, im: null, r: null, pts: [[t.clientX, e.timeStamp]] };
+  }, { passive: true });
+  el.addEventListener("touchmove", (e) => {
+    if (!s) return;
+    const t = e.touches[0], dx = t.clientX - s.x, dy = t.clientY - s.y;
+    if (!s.axis) {
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      s.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      if (s.axis === "x" && count() < 2 && lbAnim) { lbAnim.finish(); lbAnim = null; }
+    }
+    if (e.cancelable) e.preventDefault();
+    if (s.axis !== "x") return;
+    s.dx = dx;
+    s.pts.push([t.clientX, e.timeStamp]);
+    if (s.pts.length > 12) s.pts.shift();
+    if (!REDUCED) place();
+  }, { passive: false });
+  el.addEventListener("touchend", (e) => { if (s && !e.touches.length) end(false); });
+  el.addEventListener("touchcancel", () => end(true));
+  // Et sveip som ender paa en av pilene eller bakgrunnen skal ikke ogsaa
+  // telle som et trykk der.
+  el.addEventListener("click", (e) => { if (Date.now() < lbNoClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+}
+
 if (!window.__smKeys) {
   window.__smKeys = 1;
   document.addEventListener("keydown", (e) => {
@@ -618,6 +732,7 @@ function wire() {
     document.getElementById("lb-close").addEventListener("click", lbClose);
     document.getElementById("lb-prev").addEventListener("click", () => lbGo(-1));
     document.getElementById("lb-next").addEventListener("click", () => lbGo(1));
+    lbSwipe(lb);
   }
   const form = document.getElementById("inq");
   if (form) form.addEventListener("submit", (e) => {
