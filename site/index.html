@@ -33,6 +33,12 @@
   .fr:hover img, .fr:focus-visible img { transform: scale(1.04); }
   #filters a:hover { color: #16130f; border-bottom-color: oklch(0.55 0.095 45); }
   #lb button:hover { opacity: 1; }
+  #work .more { color: oklch(0.55 0.095 45); }
+  #work .more:hover { color: #16130f; }
+  #work .more span, #work .more svg { transition: color 300ms ease; }
+  #work .more svg { animation: nudge 2.6s ease-in-out infinite; }
+  @keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+  @media (prefers-reduced-motion: reduce) { #work .more svg { animation: none; } }
   @media (max-width: 760px) {
     #about > div > div:first-child, #about > div > div:last-child, #broadcast p, #broadcast > div:last-child > div { grid-column: span 12 !important; }
     #services > div, #broadcast > div:last-child > div > div { grid-template-columns: 1fr !important; }

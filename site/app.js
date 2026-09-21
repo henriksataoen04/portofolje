@@ -135,6 +135,10 @@ function render() {
       <span style="font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.38)">${u.drag}</span>
     </div>
     ${workStrips()}
+    <a href="#about" class="more reveal" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:max-content;margin:0 auto;font-family:${SERIF};font-style:italic;font-size:15px">
+      <span>${u.about}</span>
+      <svg width="14" height="48" viewBox="0 0 14 48" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 1v45M1 40l6 6 6-6"/></svg>
+    </a>
   </section>
 
   <section id="about" style="background:#12100e;color:#f4f1ea;padding:clamp(90px,13vw,180px) 32px">
