@@ -66,8 +66,9 @@ function catNav() {
   ).join("");
 }
 
-let lbP = -1, lbI = 0, lbSrc = null, lbAnim = null, lbClosing = false, lbTok = 0;
+let lbP = -1, lbI = 0, lbSrc = null, lbAnim = null, lbClosing = false, lbTok = 0, lbPending = null;
 const EASE = "cubic-bezier(.16,1,.3,1)";
+const LB_IMG = "display:block;max-width:100%;max-height:100%;object-fit:contain";
 // Det lille bildet i stripa og det store i lightboxen viser hele bildet, saa
 // de har samme sideforhold. En forflytning og én skalering er nok til aa la
 // det store bildet vokse ut av plassen det sto paa, og krympe tilbake dit.
@@ -133,6 +134,7 @@ function lbClose() {
   lbClosing = true;
   const bg = el.animate([{ backgroundColor: "rgba(14,12,10,0.97)" }, { backgroundColor: "rgba(14,12,10,0)" }], { duration: 360, easing: "ease-out", fill: "forwards" });
   lbChrome().forEach((n) => n.animate([{ opacity: getComputedStyle(n).opacity }, { opacity: 0 }], { duration: 160, easing: "ease-out", fill: "forwards" }));
+  el.querySelectorAll(".lb-ghost").forEach((g) => g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: "ease-out", fill: "forwards" }));
   if (!to || !b.width || !shown) {
     // Har man bladd til et bilde som ikke synes i stripa, finnes det ingen
     // plass aa krympe tilbake til. Da toner det bare ut.
@@ -149,23 +151,72 @@ function lbClose() {
 
 function lbReset() {
   const el = document.getElementById("lb"), im = document.getElementById("lb-img");
-  lbP = -1; lbClosing = false; lbAnim = null;
+  lbP = -1; lbClosing = false; lbAnim = null; lbPending = null;
   document.body.style.overflow = "";
   if (lbSrc) { lbSrc.style.visibility = ""; lbSrc = null; }
   if (el) {
     el.style.display = "none";
     if (el.getAnimations) el.getAnimations({ subtree: true }).forEach((x) => x.cancel());
+    el.querySelectorAll(".lb-ghost").forEach((g) => g.remove());
   }
   if (im) { im.style.opacity = ""; im.style.transformOrigin = ""; }
 }
 
+// Pilene blar som paa en filmstripe: bildet du ser glir ut til den ene siden
+// mens det neste glir inn fra den andre, i samme tempo som naar et bilde
+// aapnes. Begge flyttes like langt, saa avstanden mellom dem holder seg.
 function lbGo(d) {
   if (lbP < 0 || lbClosing) return;
-  lbTok++;
-  if (lbAnim) { lbAnim.finish(); lbAnim = null; }
+  const n = catImgs(DATA.work[lbP]).length;
+  if (n < 2) return;
+  const tok = ++lbTok, el = document.getElementById("lb");
+  let im = document.getElementById("lb-img");
   if (lbSrc) { lbSrc.style.visibility = ""; lbSrc = null; }
-  document.getElementById("lb-img").style.opacity = "";
-  const n = catImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw();
+  lbI = (lbI + d + n) % n;
+  if (REDUCED || !el.animate) {
+    if (lbAnim) { lbAnim.finish(); lbAnim = null; }
+    im.style.opacity = "";
+    return lbDraw();
+  }
+  // Bildet som vises, blir liggende igjen som en kopi og glir ut, mens et nytt
+  // element tar over som lightbox-bildet. Da trenger ikke det gamle bildet aa
+  // lastes paa nytt, og ingenting blinker. Venter vi fortsatt paa forrige
+  // bilde, er det den ventende kopien som viser hva som staar paa skjermen.
+  let g = lbPending;
+  if (!g && im.style.opacity !== "0") {
+    const r = im.getBoundingClientRect();
+    if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
+    g = im;
+    g.removeAttribute("id");
+    g.className = "lb-ghost";
+    g.setAttribute("aria-hidden", "true");
+    g.style.cssText = "position:fixed;margin:0;pointer-events:none;object-fit:contain;left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;height:" + r.height + "px";
+    im = document.createElement("img");
+    im.id = "lb-img"; im.alt = ""; im.style.cssText = LB_IMG;
+    g.after(im);
+  }
+  if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
+  im.style.opacity = "0";
+  lbPending = g;
+  lbDraw();
+  // Neste bilde er hentet paa forhaand, men vi venter til det er dekodet.
+  // Ellers tegner Safari store bilder som et tomt felt til de er klare, og
+  // det er et tomt felt som ville glidd inn.
+  (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => {
+    if (tok !== lbTok || lbP < 0 || lbClosing) return;
+    lbPending = null;
+    im.style.opacity = "";
+    // Langt nok til at begge er helt utenfor kanten naar de starter og slutter.
+    const W = el.clientWidth, M = 40, b = im.getBoundingClientRect();
+    let D = d > 0 ? W - b.left + M : b.right + M;
+    if (g) {
+      const r = g.getBoundingClientRect();
+      D = Math.max(D, d > 0 ? r.right + M : W - r.left + M);
+      g.animate([{ transform: "none" }, { transform: "translateX(" + (-d * D) + "px)" }], { duration: 560, easing: EASE, fill: "forwards" }).onfinish = () => g.remove();
+    }
+    lbAnim = im.animate([{ transform: "translateX(" + (d * D) + "px)" }, { transform: "none" }], { duration: 560, easing: EASE });
+    lbAnim.onfinish = () => { lbAnim = null; };
+  });
 }
 function lbDraw() {
   const el = document.getElementById("lb"); if (!el || lbP < 0) return;
@@ -181,7 +232,10 @@ function lbDraw() {
   const vis = imgs.length > 1 ? "block" : "none";
   document.getElementById("lb-prev").style.display = vis;
   document.getElementById("lb-next").style.display = vis;
-  imgs.forEach((s, j) => { if (Math.abs(j - lbI) === 1) new Image().src = media(s.src); });
+  // Naboene hentes paa forhaand, ogsaa rundt hjoernet fra siste til foerste,
+  // saa neste bilde ligger klart naar pila trykkes.
+  const n = imgs.length;
+  imgs.forEach((s, j) => { if (j !== lbI && (j === (lbI + 1) % n || j === (lbI - 1 + n) % n)) new Image().src = media(s.src); });
 }
 if (!window.__smKeys) {
   window.__smKeys = 1;
@@ -307,7 +361,7 @@ function render() {
   </section>
 
   <div id="lb" style="position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:clamp(14px,3.5vw,58px);background:rgba(14,12,10,0.97)">
-    <img id="lb-img" alt="" style="display:block;max-width:100%;max-height:100%;object-fit:contain">
+    <img id="lb-img" alt="" style="${LB_IMG}">
     <button id="lb-prev" aria-label="${u.prev}" style="position:absolute;left:0;top:0;bottom:0;width:clamp(56px,13vw,170px);border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:40px;opacity:0.4;cursor:pointer;transition:opacity 300ms ease">&lsaquo;</button>
     <button id="lb-next" aria-label="${u.next}" style="position:absolute;right:0;top:0;bottom:0;width:clamp(56px,13vw,170px);border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:40px;opacity:0.4;cursor:pointer;transition:opacity 300ms ease">&rsaquo;</button>
     <button id="lb-close" aria-label="${u.close}" style="position:absolute;top:14px;right:20px;border:0;background:transparent;color:#f4f1ea;font-family:${SERIF};font-size:30px;line-height:1;opacity:0.5;cursor:pointer;transition:opacity 300ms ease">&times;</button>
