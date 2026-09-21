@@ -1,6 +1,6 @@
 const UI = {
-  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", drag: "Dra eller sveip for å bla", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
-  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", drag: "Drag or swipe to browse", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
+  no: { worldwide: "Tilgjengelig verden over", cue: "Rull ned", work: "Utvalgt arbeid", drag: "Dra eller sveip for å bla", curDrag: "Dra", curView: "Se", close: "Lukk", prev: "Forrige", next: "Neste", about: "Om meg", bc: "Flerkamera & tv", bcRole: "Kameraoperatør · prosjektkoordinator", services: "Tjenester", onRequest: "Pris på forespørsel", clients: "Utvalgte kunder", contact: "Kontakt", contactTitle: "La oss lage noe.", fName: "Navn", fEmail: "E-post", fBrief: "Kort om prosjektet", send: "Send forespørsel", sent: "Åpner e-postprogrammet ditt — send meldingen for å fullføre." },
+  en: { worldwide: "Available worldwide", cue: "Scroll", work: "Selected work", drag: "Drag or swipe to browse", curDrag: "Drag", curView: "View", close: "Close", prev: "Previous", next: "Next", about: "About", bc: "Multicam & broadcast", bcRole: "Camera operator · project coordinator", services: "Services", onRequest: "Quote on request", clients: "Selected clients", contact: "Contact", contactTitle: "Let's make something.", fName: "Name", fEmail: "Email", fBrief: "About the project", send: "Send inquiry", sent: "Opening your mail app — send the message to finish." }
 };
 const ACCENT = "oklch(0.55 0.095 45)";
 const ACCENT_LIGHT = "oklch(0.72 0.095 45)";
@@ -54,7 +54,7 @@ function frames(ci) {
 function workStrips() {
   return (DATA.work || []).map((c, ci) => {
     return '<section class="reveal" id="' + slug(c.name_no) + '" style="margin-bottom:clamp(44px,6vw,86px);scroll-margin-top:86px">'
-      + '<h3 style="margin:0 0 15px;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
+      + '<h3 class="lines" style="margin:0 0 15px;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
       + '<div class="strip" tabindex="0" style="display:flex;gap:10px;height:clamp(215px,30vh,370px);overflow-x:auto;margin-right:-32px;padding-right:32px">' + frames(ci) + '</div>'
       + '</section>';
   }).join("");
@@ -66,10 +66,107 @@ function catNav() {
   ).join("");
 }
 
-let lbP = -1, lbI = 0;
-function lbOpen(p, i) { lbP = p; lbI = i; document.body.style.overflow = "hidden"; lbDraw(); }
-function lbClose() { lbP = -1; document.body.style.overflow = ""; const e = document.getElementById("lb"); if (e) e.style.display = "none"; }
-function lbGo(d) { if (lbP < 0) return; const n = catImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw(); }
+let lbP = -1, lbI = 0, lbSrc = null, lbAnim = null, lbClosing = false, lbTok = 0;
+const EASE = "cubic-bezier(.16,1,.3,1)";
+// Det lille bildet i stripa og det store i lightboxen viser hele bildet, saa
+// de har samme sideforhold. En forflytning og én skalering er nok til aa la
+// det store bildet vokse ut av plassen det sto paa, og krympe tilbake dit.
+const flip = (a, b) => "translate(" + (a.left - b.left) + "px," + (a.top - b.top) + "px) scale(" + (a.width / b.width) + "," + (a.height / b.height) + ")";
+// Bildet under pekeren er forstoerret litt (hover), og rammen klipper bort
+// kanten. Vi vil ha plassen bildet faktisk staar paa, uten forstoerrelsen.
+const box = (img) => {
+  const r = img.getBoundingClientRect(), w = img.offsetWidth, h = img.offsetHeight;
+  return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+};
+const lbChrome = () => ["lb-cap", "lb-prev", "lb-next", "lb-close"].map((id) => document.getElementById(id)).filter(Boolean);
+
+// Paa vei tilbake maa bildet finne plassen sin igjen. Samme bilde kan ligge i
+// flere kopier av stripa; vi velger den som faktisk synes mest paa skjermen.
+function lbTarget() {
+  let best = null, most = 0;
+  document.querySelectorAll('.fr[data-p="' + lbP + '"][data-i="' + lbI + '"] img').forEach((img) => {
+    const r = img.getBoundingClientRect();
+    const w = Math.min(r.right, innerWidth) - Math.max(r.left, 0);
+    const h = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+    if (w > 0 && h > 0 && w * h > most) { best = img; most = w * h; }
+  });
+  return best;
+}
+
+function lbOpen(p, i, from) {
+  lbP = p; lbI = i; lbClosing = false;
+  const tok = ++lbTok;
+  document.body.style.overflow = "hidden";
+  curHide();
+  const el = document.getElementById("lb"), im = document.getElementById("lb-img");
+  const src = from && from.querySelector("img");
+  const animate = !REDUCED && src && el && el.animate;
+  if (animate) im.style.opacity = "0";
+  lbDraw();
+  if (!animate) return;
+  el.animate([{ backgroundColor: "rgba(14,12,10,0)" }, { backgroundColor: "rgba(14,12,10,0.97)" }], { duration: 420, easing: "ease-out" });
+  lbChrome().forEach((n) => n.animate([{ opacity: 0 }, { opacity: getComputedStyle(n).opacity }], { duration: 380, delay: 240, easing: "ease-out", fill: "backwards" }));
+  // Det store bildet maa vaere dekodet foer vi vet hvor stort det blir. Det er
+  // allerede lastet i stripa, saa det tar millisekunder — men uten aa vente
+  // regner vi fra et bilde uten stoerrelse.
+  (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => {
+    if (tok !== lbTok || lbP < 0 || lbClosing) return;
+    im.style.opacity = "";
+    const a = box(src), b = im.getBoundingClientRect();
+    if (!a.width || !b.width) return;
+    lbSrc = src; src.style.visibility = "hidden";
+    im.style.transformOrigin = "0 0";
+    lbAnim = im.animate([{ transform: flip(a, b) }, { transform: "none" }], { duration: 560, easing: EASE });
+    lbAnim.onfinish = () => { lbAnim = null; };
+  });
+}
+
+function lbClose() {
+  const el = document.getElementById("lb"), im = document.getElementById("lb-img");
+  if (lbClosing) return;
+  if (lbP < 0 || !el || el.style.display === "none" || REDUCED || !el.animate) return lbReset();
+  // Lukker man midt i aapningen, staar bildet et sted mellom stripa og
+  // fullskjerm. Derfra, ikke fra fullskjerm, skal det tilbake.
+  const now = im.getBoundingClientRect();
+  if (lbAnim) { lbAnim.cancel(); lbAnim = null; }
+  const b = im.getBoundingClientRect(), to = lbTarget(), shown = im.style.opacity !== "0";
+  lbClosing = true;
+  const bg = el.animate([{ backgroundColor: "rgba(14,12,10,0.97)" }, { backgroundColor: "rgba(14,12,10,0)" }], { duration: 360, easing: "ease-out", fill: "forwards" });
+  lbChrome().forEach((n) => n.animate([{ opacity: getComputedStyle(n).opacity }, { opacity: 0 }], { duration: 160, easing: "ease-out", fill: "forwards" }));
+  if (!to || !b.width || !shown) {
+    // Har man bladd til et bilde som ikke synes i stripa, finnes det ingen
+    // plass aa krympe tilbake til. Da toner det bare ut.
+    if (shown) im.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-out", fill: "forwards" });
+    bg.onfinish = lbReset;
+    return;
+  }
+  const a = box(to);
+  if (lbSrc && lbSrc !== to) lbSrc.style.visibility = "";
+  lbSrc = to; to.style.visibility = "hidden";
+  im.style.transformOrigin = "0 0";
+  im.animate([{ transform: flip(now, b) }, { transform: flip(a, b) }], { duration: 460, easing: EASE, fill: "forwards" }).onfinish = lbReset;
+}
+
+function lbReset() {
+  const el = document.getElementById("lb"), im = document.getElementById("lb-img");
+  lbP = -1; lbClosing = false; lbAnim = null;
+  document.body.style.overflow = "";
+  if (lbSrc) { lbSrc.style.visibility = ""; lbSrc = null; }
+  if (el) {
+    el.style.display = "none";
+    if (el.getAnimations) el.getAnimations({ subtree: true }).forEach((x) => x.cancel());
+  }
+  if (im) { im.style.opacity = ""; im.style.transformOrigin = ""; }
+}
+
+function lbGo(d) {
+  if (lbP < 0 || lbClosing) return;
+  lbTok++;
+  if (lbAnim) { lbAnim.finish(); lbAnim = null; }
+  if (lbSrc) { lbSrc.style.visibility = ""; lbSrc = null; }
+  document.getElementById("lb-img").style.opacity = "";
+  const n = catImgs(DATA.work[lbP]).length; lbI = (lbI + d + n) % n; lbDraw();
+}
 function lbDraw() {
   const el = document.getElementById("lb"); if (!el || lbP < 0) return;
   const c = DATA.work[lbP], imgs = catImgs(c); if (!imgs.length) return;
@@ -89,7 +186,7 @@ function lbDraw() {
 if (!window.__smKeys) {
   window.__smKeys = 1;
   document.addEventListener("keydown", (e) => {
-    if (lbP < 0) return;
+    if (lbP < 0 || lbClosing) return;
     if (e.key === "Escape") lbClose();
     else if (e.key === "ArrowRight") lbGo(1);
     else if (e.key === "ArrowLeft") lbGo(-1);
@@ -122,8 +219,8 @@ function render() {
     </div>
   </section>
 
-  <section class="reveal" style="padding:clamp(90px,13vw,190px) 32px;max-width:1100px">
-    <p style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(26px,3.6vw,52px);line-height:1.22;letter-spacing:-0.01em;text-wrap:pretty">${esc(L(DATA, "statement"))}</p>
+  <section style="padding:clamp(90px,13vw,190px) 32px;max-width:1100px">
+    <p class="lines" style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(26px,3.6vw,52px);line-height:1.22;letter-spacing:-0.01em;text-wrap:pretty">${esc(L(DATA, "statement"))}</p>
   </section>
 
   <section id="work" style="padding:0 32px clamp(70px,10vw,140px)">
@@ -132,7 +229,7 @@ function render() {
     </div>
     <div id="filters" class="reveal" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:12px 30px;margin-bottom:clamp(30px,4.5vw,58px);font-family:${SERIF};font-weight:300;font-size:clamp(16px,1.6vw,22px)">
       <div style="display:flex;flex-wrap:wrap;gap:8px 26px;align-items:baseline">${catNav()}</div>
-      <span style="font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.38)">${u.drag}</span>
+      <span class="hint" style="font-style:italic;font-size:14.5px;color:rgba(22,19,15,0.38)">${u.drag}</span>
     </div>
     ${workStrips()}
     <a href="#about" class="more reveal" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:max-content;margin:0 auto;font-family:${SERIF};font-style:italic;font-size:15px">
@@ -145,7 +242,7 @@ function render() {
     <div class="reveal" style="display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(24px,4vw,60px);max-width:1400px">
       <div style="grid-column:span 4;font-family:${SERIF};font-size:15px;color:rgba(244,241,234,0.5)">${u.about}</div>
       <div style="grid-column:span 8;display:grid;gap:30px;max-width:760px">
-        <p style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(22px,2.6vw,36px);line-height:1.3;text-wrap:pretty">${esc(L(DATA, "about"))}</p>
+        <p class="lines" style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(22px,2.6vw,36px);line-height:1.3;text-wrap:pretty">${esc(L(DATA, "about"))}</p>
         <p style="margin:0;font-size:16.5px;line-height:1.7;color:rgba(244,241,234,0.72);text-wrap:pretty">${esc(L(DATA, "about2"))}</p>
         <p style="margin:0;font-size:16.5px;line-height:1.7;color:rgba(244,241,234,0.72);text-wrap:pretty">${esc(L(DATA, "about3"))}</p>
         <div style="display:grid;padding-top:10px;max-width:520px">
@@ -189,7 +286,7 @@ function render() {
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(34px,6vw,90px);max-width:1400px">
       <div class="reveal" style="display:grid;gap:26px;align-content:start">
         <div style="font-family:${SERIF};font-size:15px;color:rgba(244,241,234,0.5)">${u.contact}</div>
-        <h2 style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(32px,5vw,74px);line-height:1;letter-spacing:-0.02em">${u.contactTitle}</h2>
+        <h2 class="lines" style="margin:0;font-family:${SERIF};font-weight:300;font-size:clamp(32px,5vw,74px);line-height:1;letter-spacing:-0.02em">${u.contactTitle}</h2>
         <div style="display:grid;gap:8px;font-family:${SERIF};font-size:15px">
           <a href="${esc(mailHref)}" style="color:${ACCENT_LIGHT}">${esc(c.email || "")}</a>
           <a href="tel:${esc((c.phone || "").replace(/[^+\d]/g, ""))}" style="color:rgba(244,241,234,0.62)">${esc(c.phone || "")}</a>
@@ -230,7 +327,7 @@ const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-moti
 // Bare enheter med ekte peker kan hovre. Paa telefon skal ingenting kunne
 // pause en stripe — hver pausemekanisme er en maate den kan sette seg fast.
 const CAN_HOVER = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
-let STRIPS = [], RAF = null, LAST = 0;
+let STRIPS = [], RAF = null, LAST = 0, PENDING = [];
 
 // Rammene ligger i to identiske kopier. Naar stripa har gaatt nøyaktig én
 // kopi videre, trekkes den tilbake dit den startet — og siden kopi to ser
@@ -283,7 +380,9 @@ function loop(t) {
     // Pekeren over pauser bare naar stripa gaar i grunnfart. Glir et kast
     // fortsatt ut, ignoreres den — ellers braastopper man noe man akkurat
     // satte i gang, bare fordi man er paa vei mot et bilde.
-    st.go = r.bottom > 0 && r.top < vh && !st.drag
+    // Mens et bilde er aapent staar alle stripene, saa bildet lander paa
+    // noeyaktig samme sted naar det krymper tilbake.
+    st.go = r.bottom > 0 && r.top < vh && !st.drag && lbP < 0
       && !(st.hover && Math.abs(st.vel - SPEED) < EPS);
     st.cur = st.el.scrollLeft;
   }
@@ -326,7 +425,70 @@ if (!window.__smResize) {
     // Paa mobil fyrer resize hver gang adressefeltet skjuler seg under
     // scrolling. Uten pause ville measure() lagt til og fjernet kopier
     // kontinuerlig mens man blar.
-    rt = setTimeout(() => { for (const st of STRIPS) measure(st); startLoop(); }, 150);
+    rt = setTimeout(() => { for (const st of STRIPS) measure(st); for (const el of PENDING) splitLines(el); startLoop(); }, 150);
+  });
+}
+
+// Over stripene erstattes pekeren av en liten sirkel. Pilene forteller at
+// stripa kan dras; ordet forteller hva et klikk gjoer, og bytter til «Dra»
+// mens man holder inne. Bare med ekte peker, og ikke for de som har skrudd
+// av bevegelse.
+const CURSOR = CAN_HOVER && !REDUCED;
+let CUR = null, curOn = false, curX = 0, curY = 0, curTX = 0, curTY = 0, curRAF = null;
+function curEnsure() {
+  if (!CURSOR || CUR) return;
+  CUR = document.createElement("div");
+  CUR.id = "cur";
+  CUR.setAttribute("aria-hidden", "true");
+  CUR.innerHTML = '<div class="cur-b"><span class="cur-a">‹</span><span class="cur-t"></span><span class="cur-a">›</span></div>';
+  document.body.appendChild(CUR);
+  document.documentElement.classList.add("cur-on");
+}
+function curLabel(t) { const n = CUR.querySelector(".cur-t"); if (n.textContent !== t) n.textContent = t; }
+function curShow(e) {
+  if (!CUR) return;
+  curTX = e.clientX; curTY = e.clientY;
+  if (!curOn) { curOn = true; curX = curTX; curY = curTY; CUR.classList.add("on"); curLabel(UI[lang].curView); }
+  if (!curRAF) curRAF = requestAnimationFrame(curStep);
+}
+function curDown(on) { if (!CUR) return; CUR.classList.toggle("down", on); curLabel(on ? UI[lang].curDrag : UI[lang].curView); }
+function curHide() { if (!CUR) return; curOn = false; CUR.classList.remove("on", "down"); }
+function curStep() {
+  curX += (curTX - curX) * 0.3; curY += (curTY - curY) * 0.3;
+  const moving = Math.abs(curTX - curX) + Math.abs(curTY - curY) > 0.3;
+  if (!moving) { curX = curTX; curY = curTY; }
+  CUR.style.transform = "translate(" + curX + "px," + curY + "px)";
+  curRAF = moving ? requestAnimationFrame(curStep) : null;
+}
+
+// Store tekster glir opp linje for linje bak en usynlig kant. Linjene finnes
+// ikke i markupen — de avhenger av bredden og skrifttypen — saa vi maaler hvor
+// ordene havner og pakker hver linje inn. Naar teksten har kommet fram, legges
+// den tilbake som ren tekst, saa en senere breddeendring ikke kan klippe den.
+function splitLines(el) {
+  const text = el.dataset.text || (el.dataset.text = el.textContent.trim());
+  el.textContent = "";
+  const spans = text.split(/\s+/).map((w) => {
+    const s = document.createElement("span");
+    s.textContent = w;
+    el.appendChild(s);
+    el.appendChild(document.createTextNode(" "));
+    return s;
+  });
+  const lines = [];
+  let top = null;
+  spans.forEach((s) => {
+    if (top === null || Math.abs(s.offsetTop - top) > 2) { lines.push([]); top = s.offsetTop; }
+    lines[lines.length - 1].push(s.textContent);
+  });
+  el.textContent = "";
+  lines.forEach((ws, i) => {
+    const mask = document.createElement("span"), inner = document.createElement("span");
+    mask.className = "ln"; inner.className = "ln-i";
+    inner.style.transitionDelay = (i * 90) + "ms";
+    inner.textContent = ws.join(" ");
+    mask.appendChild(inner);
+    el.appendChild(mask);
   });
 }
 
@@ -335,6 +497,7 @@ function wire() {
     lang = el.dataset.lang; localStorage.setItem("sm-lang", lang); render();
   }));
   lbClose();
+  curEnsure();
   STRIPS = [];
   document.querySelectorAll(".strip").forEach((s) => {
     const orig = [].slice.call(s.children);
@@ -353,9 +516,15 @@ function wire() {
     });
     s.addEventListener("dragstart", (e) => e.preventDefault());
     if (CAN_HOVER) s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") st.hover = true; });
+    if (CUR && st.n) {
+      s.addEventListener("pointerenter", (e) => { if (e.pointerType !== "touch") curShow(e); });
+      s.addEventListener("pointermove", (e) => { if (e.pointerType !== "touch") curShow(e); });
+      s.addEventListener("pointerleave", curHide);
+    }
     let down = false, sx = 0, sl = 0, moved = false, px = 0, pt = 0, flick = 0;
     s.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") return;
+      curDown(true);
       down = true; moved = false; st.drag = true; st.vel = SPEED;
       sx = e.clientX; sl = s.scrollLeft; s.style.cursor = "grabbing";
       px = e.clientX; pt = e.timeStamp || performance.now(); flick = 0;
@@ -376,6 +545,7 @@ function wire() {
       // Synk telleren til der brukeren slapp, saa avlesningen over ikke regner
       // ut farten paa nytt og overskriver kastet vi nettopp maalte.
       if (down) { st.pos = s.scrollLeft; st.written = s.scrollLeft; }
+      curDown(false);
       down = false; st.drag = false; s.style.cursor = ""; startLoop();
     };
     s.addEventListener("pointerup", end);
@@ -385,7 +555,7 @@ function wire() {
     s.addEventListener("click", (e) => {
       if (moved) { moved = false; e.preventDefault(); e.stopPropagation(); return; }
       const f = e.target.closest ? e.target.closest(".fr") : null;
-      if (f) lbOpen(+f.dataset.p, +f.dataset.i);
+      if (f) lbOpen(+f.dataset.p, +f.dataset.i, f);
     });
   });
   const lb = document.getElementById("lb");
@@ -410,6 +580,26 @@ function wire() {
   document.querySelectorAll(".reveal").forEach((n) => {
     if (n.getBoundingClientRect().top > window.innerHeight * 0.9) { n.style.opacity = 0; n.style.transform = "translateY(34px)"; io.observe(n); }
   });
+  PENDING = [];
+  if (!REDUCED) {
+    const lio = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      lio.unobserve(el);
+      PENDING = PENDING.filter((x) => x !== el);
+      void el.offsetWidth;
+      el.classList.add("in");
+      const n = el.querySelectorAll(".ln-i").length;
+      setTimeout(() => { if (el.isConnected) { el.textContent = el.dataset.text; el.classList.remove("in"); } }, 900 + Math.max(0, n - 1) * 90 + 80);
+    }), { rootMargin: "0px 0px -12% 0px" });
+    document.querySelectorAll(".lines").forEach((el) => {
+      if (el.getBoundingClientRect().top <= window.innerHeight * 0.9) return;
+      splitLines(el); PENDING.push(el); lio.observe(el);
+    });
+    // Skrifttypen kommer fra Google og kan lande etter oss. Da brytes linjene
+    // annerledes, saa vi maaler paa nytt naar den er paa plass.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => PENDING.forEach(splitLines));
+  }
 }
 fetch("content/site.json?v=" + Date.now()).then((r) => r.json()).then((d) => { DATA = d; render(); }).catch((e) => {
   document.getElementById("app").innerHTML = '<p style="padding:60px 32px;font-family:' + SERIF + '">Kunne ikke laste innhold.</p>';

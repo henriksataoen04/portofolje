@@ -39,6 +39,16 @@
   #work .more svg { animation: nudge 2.6s ease-in-out infinite; }
   @keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
   @media (prefers-reduced-motion: reduce) { #work .more svg { animation: none; } }
+  .lines .ln { display: block; clip-path: inset(-0.3em -0.5em -0.3em -0.5em); }
+  .lines .ln-i { display: block; white-space: nowrap; transform: translateY(160%); transition: transform 900ms cubic-bezier(.16,1,.3,1); }
+  .lines.in .ln-i { transform: none; }
+  #cur { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; }
+  #cur .cur-b { display: flex; align-items: center; justify-content: center; gap: 7px; width: 78px; height: 78px; margin: -39px 0 0 -39px; border-radius: 50%; background: oklch(0.55 0.095 45); color: #f4f1ea; font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 14.5px; opacity: 0; transform: scale(0.3); transition: opacity 220ms ease, transform 420ms cubic-bezier(.16,1,.3,1); }
+  #cur.on .cur-b { opacity: 1; transform: scale(1); }
+  #cur.on.down .cur-b { transform: scale(0.84); }
+  #cur .cur-a { font-style: normal; font-size: 13px; opacity: 0.75; }
+  html.cur-on .strip, html.cur-on .strip * { cursor: none !important; }
+  html.cur-on #filters .hint { display: none; }
   @media (max-width: 760px) {
     #about > div > div:first-child, #about > div > div:last-child, #broadcast p, #broadcast > div:last-child > div { grid-column: span 12 !important; }
     #services > div, #broadcast > div:last-child > div > div { grid-template-columns: 1fr !important; }
