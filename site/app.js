@@ -39,10 +39,13 @@ const slug = (s) => {
 const catImgs = (c) => (Array.isArray(c && c.images) ? c.images : [])
   .map((x) => (typeof x === "string" ? { src: x } : x))
   .filter((x) => x && x.src);
+// En kategori uten bilder holdes skjult, saa den kan opprettes i CMS-et foer
+// bildene er klare uten at siden viser en tom stripe. Indeksen beholdes:
+// stripene og lightboxen slaar opp i DATA.work med den.
+const shownCats = () => (DATA.work || []).map((c, ci) => [c, ci]).filter(([c]) => catImgs(c).length);
 
 function frames(ci) {
   const c = DATA.work[ci], imgs = catImgs(c);
-  if (!imgs.length) return '<div style="flex:none;height:100%;aspect-ratio:3 / 2;background-image:repeating-linear-gradient(135deg,#e6e1d6 0 7px,#dcd6c9 7px 14px)"></div>';
   const nm = L(c, "name");
   return imgs.map((im, j) =>
     '<button class="fr" data-p="' + ci + '" data-i="' + j + '" aria-label="' + esc(nm + " " + (j + 1) + " / " + imgs.length + (im.caption ? " — " + im.caption : "")) + '" style="flex:none;height:100%;min-width:110px;margin:0;padding:0;border:0;background:#e6e1d6;overflow:hidden;cursor:zoom-in">'
@@ -52,7 +55,7 @@ function frames(ci) {
 }
 
 function workStrips() {
-  return (DATA.work || []).map((c, ci) => {
+  return shownCats().map(([c, ci]) => {
     return '<section class="reveal" id="' + slug(c.name_no) + '" style="margin-bottom:clamp(44px,6vw,86px);scroll-margin-top:86px">'
       + '<h3 class="lines" style="margin:0 0 15px;font-family:' + SERIF + ';font-weight:300;font-size:clamp(23px,2.7vw,38px);line-height:1.1;letter-spacing:-0.01em">' + esc(L(c, "name")) + '</h3>'
       + '<div class="strip" tabindex="0" style="display:flex;gap:10px;height:clamp(215px,30vh,370px);overflow-x:auto;margin-right:-32px;padding-right:32px">' + frames(ci) + '</div>'
@@ -61,7 +64,7 @@ function workStrips() {
 }
 
 function catNav() {
-  return (DATA.work || []).map((c) =>
+  return shownCats().map(([c]) =>
     '<a href="#' + slug(c.name_no) + '" style="color:rgba(22,19,15,0.45);border-bottom:1px solid transparent;padding-bottom:3px;transition:color 300ms ease,border-color 300ms ease">' + esc(L(c, "name")) + '</a>'
   ).join("");
 }

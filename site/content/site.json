@@ -102,6 +102,11 @@
       ]
     },
     {
+      "name_no": "Bedrift",
+      "name_en": "Business",
+      "images": []
+    },
+    {
       "name_no": "Eiendom",
       "name_en": "Property",
       "images": [
